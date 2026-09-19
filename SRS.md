@@ -550,7 +550,6 @@ Possible triggers:
 - Overall risk score increasing
 
 Thresholds should be configurable.
-
 ---
 
 # 16. Feature 12 — Teacher Dashboard

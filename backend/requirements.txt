@@ -4,3 +4,6 @@ pydantic-settings==2.15.0
 python-multipart==0.0.32
 sqlalchemy==2.0.54
 pwdlib[argon2]==0.3.1
+PyJWT==2.10.1
+pandas==2.3.3
+openai==1.109.1

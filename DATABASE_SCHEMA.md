@@ -57,12 +57,12 @@ ai_advice(id PK, student_id FK, kind[ANALYSIS], input_hash, payload JSON,
 study_plans(id PK, student_id FK, exam_date, available_hours_per_day, inputs JSON,
             source[AI|FALLBACK], model NULL, prompt_version, created_by_user_id FK, created_at)
 study_plan_items(id PK, plan_id FK ON DELETE CASCADE, plan_date, subject_id FK,
-                 topic, activity, duration_minutes 1..480, priority[LOW|MEDIUM|HIGH],
+                 topic<=80, activity<=200, duration_minutes 1..480, priority[LOW|MEDIUM|HIGH],
                  is_completed default false, completed_at NULL)
 ai_chat_messages(id PK, student_id FK, role[USER|ASSISTANT], content,
                  source[AI|FALLBACK] NULL, created_at)
 interventions(id PK, student_id FK, teacher_id FK, subject_id FK NULL, title, description,
-              priority, status[PENDING|IN_PROGRESS|COMPLETED], due_date,
+              priority[LOW|MEDIUM|HIGH], status[PENDING|IN_PROGRESS|COMPLETED], due_date,
               baseline_score NULL, baseline_level, baseline_at,
               outcome_score NULL, outcome_level NULL, outcome_at NULL,
               completion_note NULL, created_at, updated_at)
@@ -78,5 +78,23 @@ interventions(id PK, student_id FK, teacher_id FK, subject_id FK NULL, title, de
 - Subject delete: RESTRICT while enrollments exist.
 - Enrollment delete cascades to its attendance and assessments. Study plan delete cascades to items.
 - Validation lives in **both** Pydantic (friendly errors) and DB CHECK constraints (safety net).
+
+### 3.5 Seed scale
+
+Copied from archived `MASTER_DESIGN.md` §9 so Phase 2 does not depend on the archive.
+
+Synthetic, deterministic (`random.Random(42)`). Command: `python -m scripts.reset_db && python -m scripts.seed_demo [--as-of YYYY-MM-DD]`.
+
+Default `--as-of` is `2026-09-19` (D17). Weekly attendance dates are the 12 days `as_of - 11 weeks` … `as_of`. Implementation: `scripts/seed_generator.py`.
+
+**Counts:** 40 generated students + 3 edge-case students (**43** total). Story login `rahul@demo.edu` is one of the 40 (DECLINING profile), not an extra row. 2 teachers, 5 subjects (CS301–CS305), Semester 5, sections A/B.
+
+**Per student per subject (generated profiles):** 12 weekly attendance records; INTERNAL ×3, QUIZ ×4, ASSIGNMENT ×3; previous results for semesters 3 and 4; one study-habits row.
+
+**Edge logins** (password `Demo@1234`): `newstudent@demo.edu` (no data), `zeroclass@demo.edu` (0 classes held), `missingassign@demo.edu` (many MISSING assignments). Teachers: `teacher1@demo.edu` (CS301/CS302/CS303, section ALL), `teacher2@demo.edu` (CS304/CS305 ALL, CS301 section B).
+
+**Profile mix** (of the 40 generated students): High 6 / Average 12 / Low 7 / Improving 5 / Declining 6 / Inconsistent 4.
+
+Risk-history back-fill: 4 snapshots per student at `as_of` minus 9, 6, 3 and 0 weeks (Phase 5.10). Story login `rahul@demo.edu` is tuned so the latest snapshot is HIGH.
 
 ---

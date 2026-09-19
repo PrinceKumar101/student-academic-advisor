@@ -1,0 +1,12 @@
+target-version = "py311"
+line-length = 88
+src = ["app", "tests", "scripts"]
+
+[lint]
+select = ["E", "F", "I", "UP"]
+
+[lint.isort]
+known-first-party = ["app", "scripts"]
+
+[lint.per-file-ignores]
+"tests/api/test_auth_matrix.py" = ["E501"]

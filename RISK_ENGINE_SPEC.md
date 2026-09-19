@@ -53,7 +53,8 @@ floors (never lower a level, never raise above MEDIUM):
    attendance_percent < 75          -> at least MEDIUM
    internal_percent   < 40 (pass)   -> at least MEDIUM
 final level = max(base_level, floor)
-if floor raised the level: escalated = true, escalation_reason = "Attendance below 75% cutoff"
+if floor raised the level: escalated = true; escalation_reason lists each floor that fired
+   ("Attendance below 75% cutoff" and/or "Internal marks below 40% pass cutoff"), joined with "; ".
 The numeric score is never altered by escalation.
 ```
 Study habits (self-reported) can never trigger a floor.
@@ -73,7 +74,7 @@ Component level uses the same thresholds on the component risk (≤30 LOW, ≤60
 
 ### 6.7 What-if
 
-`simulate(inputs, overrides, config)` builds `replace(inputs, **overrides)`, runs `compute_risk` twice and diffs. Allowed override keys are those in §4.3. An override may activate a component whose real value is `None`; the response marks it as `hypothetical`. No DB access.
+`simulate(inputs, overrides, config)` builds `replace(inputs, **overrides)`, runs `compute_risk` twice and diffs. Allowed override keys are those in `API_SPEC.md` §4.3. An override may activate a component whose real value is `None`; the response marks it as `hypothetical`. No DB access.
 
 ### 6.8 Required risk-engine test cases (worked expected values)
 
@@ -107,7 +108,8 @@ Series = ordered (by date) percentage values. Requires ≥ 3 points, else `INSUF
 - `slope ≥ +2.0` IMPROVING · `slope ≤ −2.0` DECLINING · otherwise STABLE.
 - **Sudden change:** last value differs from the mean of the previous values by ≥ 15 points → `SUDDEN_DROP` / `SUDDEN_RISE` flag.
 - Worked check: 72, 69, 63, 55 → mean 64.75, slope **−5.7**, DECLINING; last vs mean of previous = 55 − 68 = −13, no sudden flag.
-- Series produced: overall assessments, per type, per subject, weekly attendance, risk history.
+- Series produced: overall assessments (all GRADED types), per type, per subject, weekly attendance (held/attended summed across subjects on each record date), risk history (snapshot scores; same slope rule, higher score is not inverted).
+- Thresholds live in `engines/trend_config.py` (`TREND_CONFIG`, version `1.0`): min points 3; slope cutoffs ±2.0; sudden change 15; subject bands 50/65; subject attendance alert 75; recent attendance window 4 weeks; drop WARNING/CRITICAL 10/20; missing-assignment streak 2/3; comparison group minimum 5.
 
 ### 7.2 Subject analysis
 
@@ -134,6 +136,6 @@ Counts by risk level; mean attendance (mean of student-level values); mean marks
 
 ### 7.5 Intervention before/after
 
-Baseline (score, level, timestamp) is **copied** onto the intervention at creation. Outcome is captured when the intervention is completed. `progress` compares the baseline with the current live risk. Wording is observational only (see the contract in §4.3).
+Baseline (score, level, timestamp) is **copied** onto the intervention at creation. Outcome is captured when the intervention is completed. `progress` compares the baseline with the current live risk. Wording is observational only (see the contract in `API_SPEC.md` §4.3).
 
 ---

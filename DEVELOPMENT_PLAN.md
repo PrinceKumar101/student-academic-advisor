@@ -137,12 +137,12 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Files:** `db/`, `models/`, `core/security.py` (hash helpers only), `scripts/reset_db.py`, `scripts/seed_demo.py`.
 
 - [x] 2.1 **[M]** SQLAlchemy setup (engine, session, `Base`, `get_db`), **SQLite FK pragma**, `enums.py`. Models: `User`, `Student`, `Teacher`. `core/security.py` with `hash_password` / `verify_password`.
-- [ ] 2.2 **[M]** Models: `Subject`, `Enrollment`, `TeachingAssignment`, `AttendanceRecord`, `Assessment` (with CHECK constraints), `SemesterResult`, `StudyHabit`.
-- [ ] 2.3 **[M]** Model: `RiskAssessment` (JSON columns). Indexes review. `reset_db.py` (drop, create).
-- [ ] 2.4 **[M]** Seed generator core: RNG, profile parameters (six profiles), name list, subject and teacher setup, enrollments, teaching assignments.
-- [ ] 2.5 **[M]** Seed generator data: weekly attendance, assessments (INTERNAL/QUIZ/ASSIGNMENT with MISSING status), semester results, study habits per profile.
-- [ ] 2.6 **[M]** Story and edge students (`rahul`, `newstudent`, `zeroclass`, `missingassign`) and `seed_demo.py` CLI with `--as-of`.
-- [ ] 2.7 **[M]** Database tests: constraints, FK enforcement, uniqueness, cascade rules, seed counts and determinism.
+- [x] 2.2 **[M]** Models: `Subject`, `Enrollment`, `TeachingAssignment`, `AttendanceRecord`, `Assessment` (with CHECK constraints), `SemesterResult`, `StudyHabit`.
+- [x] 2.3 **[M]** Model: `RiskAssessment` (JSON columns). Indexes review. `reset_db.py` (drop, create).
+- [x] 2.4 **[M]** Seed generator core: RNG, profile parameters (six profiles), name list, subject and teacher setup, enrollments, teaching assignments.
+- [x] 2.5 **[M]** Seed generator data: weekly attendance, assessments (INTERNAL/QUIZ/ASSIGNMENT with MISSING status), semester results, study habits per profile.
+- [x] 2.6 **[M]** Story and edge students (`rahul`, `newstudent`, `zeroclass`, `missingassign`) and `seed_demo.py` CLI with `--as-of`.
+- [x] 2.7 **[M]** Database tests: constraints, FK enforcement, uniqueness, cascade rules, seed counts and determinism.
 
 **Tests:** CHECK violations (`attended > held`, `GRADED` without marks); duplicate `(student, subject)` enrollment rejected; FK enforcement proven (insert with a bad FK fails); seed twice gives identical data; counts match `DATABASE_SCHEMA.md` §3.5.
 **Docs:** `DATABASE_SCHEMA.md` (final columns).
@@ -157,13 +157,13 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 2.
 **Files:** `core/security.py`, `api/deps.py`, `api/routers/auth.py`, `schemas/auth.py`, `scripts/create_teacher.py`.
 
-- [ ] 3.1 **[M]** JWT create/decode (PyJWT), config for secret and expiry, startup check for the default secret outside dev.
-- [ ] 3.2 **[M]** `POST /auth/register` (student only, creates user + student profile), password rules, 409 on duplicates.
-- [ ] 3.3 **[M]** `POST /auth/login` (OAuth2 form), identical 401 for all failures, inactive users rejected.
-- [ ] 3.4 **[M]** `get_current_user`, `require_role(...)`, `GET /auth/me`, `POST /auth/logout` (204).
-- [ ] 3.5 **[M]** `authorize_student_access(student_id | "me")` covering the student-own and teacher-visible rules (via `teaching_assignments` + enrollments).
-- [ ] 3.6 **[M]** `scripts/create_teacher.py`.
-- [ ] 3.7 **[M]** Auth tests (below).
+- [x] 3.1 **[M]** JWT create/decode (PyJWT), config for secret and expiry, startup check for the default secret outside dev.
+- [x] 3.2 **[M]** `POST /auth/register` (student only, creates user + student profile), password rules, 409 on duplicates.
+- [x] 3.3 **[M]** `POST /auth/login` (OAuth2 form), identical 401 for all failures, inactive users rejected.
+- [x] 3.4 **[M]** `get_current_user`, `require_role(...)`, `GET /auth/me`, `POST /auth/logout` (204).
+- [x] 3.5 **[M]** `authorize_student_access(student_id | "me")` covering the student-own and teacher-visible rules (via `teaching_assignments` + enrollments).
+- [x] 3.6 **[M]** `scripts/create_teacher.py`.
+- [x] 3.7 **[M]** Auth tests (below).
 
 **Tests:** valid login; wrong password and unknown email are indistinguishable; expired token 401; tampered token 401; missing token 401; register cannot set a role (extra field ignored or rejected); student cannot call a teacher-only route (403); **student A → student B = 403**; teacher sees own subject's students, not others; inactive user rejected; `password_hash` never in any response.
 **Docs:** `API_SPEC.md` (auth), `ARCHITECTURE.md` (auth flow, library choice).
@@ -178,15 +178,16 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 3.
 **Files:** `api/routers/{students,subjects,attendance,assessments}.py`, `services/academic_data_loader.py`, `schemas/`.
 
-- [ ] 4.1 **[M]** Subjects CRUD + enrollment endpoints.
-- [ ] 4.2 **[M]** `GET /students/{id}`, study-habits GET (S,T) / PUT (S only), semester-results GET (S,T) / PUT (teacher).
-- [ ] 4.3 **[M]** Attendance endpoints with the computed % summary per subject (guards zero classes).
-- [ ] 4.4 **[M]** Assessment endpoints (types, status rules, marks bounds).
-- [ ] 4.5 **[M]** Teacher write-permission rule (only taught subjects and sections) shared by 4.1, 4.3 and 4.4.
-- [ ] 4.6 **[M]** Pagination and filter helpers.
-- [ ] 4.7 **[M]** `academic_data_loader.load(student_ids, as_of)` returns plain dataclasses (`StudentAcademicData`) using bulk queries, filtering by `as_of`.
-- [ ] 4.8 **[M]** API tests for all endpoints plus the loader.
-- [ ] 4.9 **[S]** CSV import for attendance and assessments (validate, dry-run, then commit). *Defer to Phase 12 if time is short.*
+- [x] 4.1 **[M]** Subjects CRUD + enrollment endpoints.
+- [x] 4.2 **[M]** `GET /students/{id}`, study-habits GET (S,T) / PUT (S only), semester-results GET (S,T) / PUT (teacher).
+- [x] 4.3 **[M]** Attendance endpoints with the computed % summary per subject (guards zero classes).
+- [x] 4.4 **[M]** Assessment endpoints (types, status rules, marks bounds).
+- [x] 4.5 **[M]** Teacher write-permission rule (only taught subjects and sections) shared by 4.1, 4.3 and 4.4.
+- [x] 4.6 **[M]** Pagination and filter helpers.
+- [x] 4.7 **[M]** `academic_data_loader.load(student_ids, as_of)` returns plain dataclasses (`StudentAcademicData`) using bulk queries, filtering by `as_of`.
+- [x] 4.8 **[M]** API tests for all endpoints plus the loader.
+- [x] 4.9 **[S]** CSV import for attendance and assessments (validate, dry-run, then commit). *Defer to Phase 12 if time is short.*
+  > Implemented in 12.9 as `POST /imports/attendance` and `POST /imports/assessments` (D30).
 
 **Tests:** every endpoint × (owner, other student, teacher-of-subject, teacher-of-other-subject); validation errors; percent computed from records; zero classes → `null`; loader returns the same numbers as raw SQL sums; loader respects `as_of`; loader query count does not grow with student count.
 **Docs:** `API_SPEC.md`.
@@ -201,16 +202,17 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 4.
 **Files:** `engines/{risk_config,metrics,risk_engine}.py`, `services/risk_service.py`, `api/routers/risk.py`, `tests/unit/test_risk_*.py`.
 
-- [ ] 5.1 **[M]** `risk_config.py`: weights, thresholds, cutoffs, `config_version`, import-time validation, **round-half-up** helper.
-- [ ] 5.2 **[M]** `metrics.py`: turn `StudentAcademicData` into `RiskInputs` (percent definitions from design §6.1).
-- [ ] 5.3 **[M]** Component normalizers (attendance, performance, assignments, study).
-- [ ] 5.4 **[M]** Aggregator: missing-data renormalization, completeness, `INSUFFICIENT_DATA`.
-- [ ] 5.5 **[M]** Classification + escalation floors.
-- [ ] 5.6 **[M]** Component levels, `top_factors`, templated notes, flags.
-- [ ] 5.7 **[M]** `risk_service`: load → compute → persist snapshot (only if none today or score changed).
-- [ ] 5.8 **[M]** `GET /risk/{id}`, `GET /risk/{id}/history`.
-- [ ] 5.9 **[M]** Test suite: R1–R13 from the design, plus API tests.
-- [ ] 5.10 **[M]** Extend seed: back-fill 4 historical snapshots per student using `as_of`; check profile students land in expected bands and `rahul` ends HIGH.
+- [x] 5.1 **[M]** `risk_config.py`: weights, thresholds, cutoffs, `config_version`, import-time validation, **round-half-up** helper.
+- [x] 5.2 **[M]** `metrics.py`: turn `StudentAcademicData` into `RiskInputs` (percent definitions from design §6.1).
+- [x] 5.3 **[M]** Component normalizers (attendance, performance, assignments, study).
+- [x] 5.4 **[M]** Aggregator: missing-data renormalization, completeness, `INSUFFICIENT_DATA`.
+- [x] 5.5 **[M]** Classification + escalation floors.
+- [x] 5.6 **[M]** Component levels, `top_factors`, templated notes, flags.
+- [x] 5.7 **[M]** `risk_service`: load → compute → persist snapshot (only if none today or score changed).
+- [x] 5.8 **[M]** `GET /risk/{id}`, `GET /risk/{id}/history`.
+- [x] 5.9 **[M]** Test suite: R1–R13 from the design, plus API tests.
+- [x] 5.10 **[M]** Extend seed: back-fill 4 historical snapshots per student using `as_of`; check profile students land in expected bands and `rahul` ends HIGH.
+  > Story attendance/marks were steepened so the 12-week averages produce HIGH (the weekly 82→64 path averages to MEDIUM).
 
 **Tests:** cases R1–R13 with the exact expected values; seeded property test for monotonicity; snapshot dedupe; API authorization; engine has no imports from FastAPI, SQLAlchemy or `ai/` (an import-boundary test).
 **Docs:** `RISK_ENGINE_SPEC.md` final, `API_SPEC.md`.
@@ -225,14 +227,14 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 5.
 **Files:** `engines/{trend_engine,warnings,analytics}.py`, `services/{trend_service,analytics_service}.py`, `api/routers/{trends,analytics}.py`.
 
-- [ ] 6.1 **[M]** `trend_engine`: least-squares slope, labels, sudden-change flag, minimum 3 points.
-- [ ] 6.2 **[M]** Series builders: overall, per type, per subject, weekly attendance, risk history.
-- [ ] 6.3 **[M]** Subject analysis (bands, subject attendance alerts).
-- [ ] 6.4 **[M]** Early-warning rules (design §7.3), configurable thresholds.
-- [ ] 6.5 **[M]** `GET /trends/{id}`, `GET /trends/{id}/warnings`, `GET /analytics/students/{id}/subjects`.
-- [ ] 6.6 **[M]** Class-analytics functions (Pandas): level counts, means, per-subject means, trend distribution. *(Endpoints in Phase 11.)*
-- [ ] 6.7 **[S]** `GET /analytics/students/{id}/comparison` (only when group ≥ 5).
-- [ ] 6.8 **[M]** Tests.
+- [x] 6.1 **[M]** `trend_engine`: least-squares slope, labels, sudden-change flag, minimum 3 points.
+- [x] 6.2 **[M]** Series builders: overall, per type, per subject, weekly attendance, risk history.
+- [x] 6.3 **[M]** Subject analysis (bands, subject attendance alerts).
+- [x] 6.4 **[M]** Early-warning rules (design §7.3), configurable thresholds.
+- [x] 6.5 **[M]** `GET /trends/{id}`, `GET /trends/{id}/warnings`, `GET /analytics/students/{id}/subjects`.
+- [x] 6.6 **[M]** Class-analytics functions (Pandas): level counts, means, per-subject means, trend distribution. *(Endpoints in Phase 11.)*
+- [x] 6.7 **[S]** `GET /analytics/students/{id}/comparison` (only when group ≥ 5).
+- [x] 6.8 **[M]** Tests.
 
 **Tests:** 72,69,63,55 → slope −5.7, DECLINING; flat → STABLE; 2 points → INSUFFICIENT_DATA; 50,52,51,90 → SUDDEN_RISE; SRS examples (82→67 attendance WARNING, 76→48 quiz CRITICAL); subject bands at 49.9/50/64.9/65; empty data; seeded `rahul` has DECLINING trend and warnings; seeded improving student has IMPROVING.
 **Docs:** `RISK_ENGINE_SPEC.md` (trend section), `API_SPEC.md`.
@@ -247,10 +249,10 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 5.
 **Files:** `engines/whatif.py`, `services/whatif_service.py`, `api/routers/risk.py`.
 
-- [ ] 7.1 **[M]** Request schema with allowed keys and bounds.
-- [ ] 7.2 **[M]** `simulate(inputs, overrides)` returning current, simulated, difference, changed factors.
-- [ ] 7.3 **[M]** `POST /risk/{id}/what-if` with authorization.
-- [ ] 7.4 **[M]** Tests.
+- [x] 7.1 **[M]** Request schema with allowed keys and bounds.
+- [x] 7.2 **[M]** `simulate(inputs, overrides)` returning current, simulated, difference, changed factors.
+- [x] 7.3 **[M]** `POST /risk/{id}/what-if` with authorization.
+- [x] 7.4 **[M]** Tests.
 
 **Tests:** attendance 64 → 80 on R3 gives −10.0 and MEDIUM (W1); unknown key 422; out-of-range 422; empty overrides give difference 0; **row counts and values in every table unchanged after the call**; activating a `None` component is flagged hypothetical.
 **Docs:** `API_SPEC.md`.
@@ -265,16 +267,16 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 5, 6.
 **Files:** `ai/*`, `services/ai_service.py`, `models/ai_advice.py`, `api/routers/ai.py`.
 
-- [ ] 8.1 **[M]** Config (key, model name, timeouts, daily limits) and `ai/` package skeleton. Add `openai` dependency.
-- [ ] 8.2 **[M]** `ai/client.py`: timeout, single-retry policy, error taxonomy (`TIMEOUT`, `PROVIDER_ERROR`, `NOT_CONFIGURED`), usage logging. Injectable so tests use a fake.
-- [ ] 8.3 **[M]** `context_builder`: `StudentAcademicContext` from engine outputs; no-PII test.
-- [ ] 8.4 **[M]** Output schemas (Pydantic) and validators: structure, enums, lengths, grounding check (§5.4).
-- [ ] 8.5 **[M]** Prompt `analysis_v1` (system + user templates, injection hardening).
-- [ ] 8.6 **[M]** Deterministic fallback advice generator (from risk factors and warnings).
-- [ ] 8.7 **[M]** `AIAdvice` model, input-hash cache (24 h), daily-limit counting, `GET /ai/usage`.
-- [ ] 8.8 **[M]** `analyze_performance` service and `POST /ai/analysis`.
-- [ ] 8.9 **[M]** Tests with the fake client (below).
-- [ ] 8.10 **[S]** `scripts/ai_smoke_test.py` for a manual real-API check (never run in CI, skipped without a key).
+- [x] 8.1 **[M]** Config (key, model name, timeouts, daily limits) and `ai/` package skeleton. Add `openai` dependency.
+- [x] 8.2 **[M]** `ai/client.py`: timeout, single-retry policy, error taxonomy (`TIMEOUT`, `PROVIDER_ERROR`, `NOT_CONFIGURED`), usage logging. Injectable so tests use a fake.
+- [x] 8.3 **[M]** `context_builder`: `StudentAcademicContext` from engine outputs; no-PII test.
+- [x] 8.4 **[M]** Output schemas (Pydantic) and validators: structure, enums, lengths, grounding check (§5.4).
+- [x] 8.5 **[M]** Prompt `analysis_v1` (system + user templates, injection hardening).
+- [x] 8.6 **[M]** Deterministic fallback advice generator (from risk factors and warnings).
+- [x] 8.7 **[M]** `AIAdvice` model, input-hash cache (24 h), daily-limit counting, `GET /ai/usage`.
+- [x] 8.8 **[M]** `analyze_performance` service and `POST /ai/analysis`.
+- [x] 8.9 **[M]** Tests with the fake client (below).
+- [x] 8.10 **[S]** `scripts/ai_smoke_test.py` for a manual real-API check (never run in CI, skipped without a key).
 
 **Tests:** happy path; timeout gives fallback; 429/5xx retries once then falls back; 4xx no retry; invalid JSON gives fallback; missing field gives fallback; wrong enum gives fallback; **hallucinated percentage gives `UNGROUNDED_OUTPUT` fallback**; no key gives `NOT_CONFIGURED`; cache hit does not call the client and does not count toward the limit; limit exceeded gives 429; context has no name/email/id; teacher and student authorization; risk endpoints work with the AI disabled.
 **Docs:** `AI_GUIDELINES.md` (prompts, schemas, limits), `API_SPEC.md`.
@@ -289,14 +291,14 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 8.
 **Files:** `engines/time_budget.py`, `ai/prompts/plan_v1`, `models/study_plan*.py`, `services/study_plan_service.py`, `api/routers/study_plans.py`.
 
-- [ ] 9.1 **[M]** Models `StudyPlan`, `StudyPlanItem`.
-- [ ] 9.2 **[M]** Request schema and validation (exam date future and ≤ 60 days, hours 0.5–12, subjects belong to the student).
-- [ ] 9.3 **[M]** `time_budget.allocate(...)` (pure): concern-weighted minutes per subject per day, per-day cap, priorities.
-- [ ] 9.4 **[M]** Prompt `plan_v1` and output schema (slot text only).
-- [ ] 9.5 **[M]** Plan validator: every `slot_id` exactly once, no extras, text caps; failure gives the fallback plan.
-- [ ] 9.6 **[M]** Fallback plan with templated activities.
-- [ ] 9.7 **[M]** Endpoints: create, list, get, patch item completion, delete.
-- [ ] 9.8 **[M]** Tests.
+- [x] 9.1 **[M]** Models `StudyPlan`, `StudyPlanItem`.
+- [x] 9.2 **[M]** Request schema and validation (exam date future and ≤ 60 days, hours 0.5–12, subjects belong to the student).
+- [x] 9.3 **[M]** `time_budget.allocate(...)` (pure): concern-weighted minutes per subject per day, per-day cap, priorities.
+- [x] 9.4 **[M]** Prompt `plan_v1` and output schema (slot text only).
+- [x] 9.5 **[M]** Plan validator: every `slot_id` exactly once, no extras, text caps; failure gives the fallback plan.
+- [x] 9.6 **[M]** Fallback plan with templated activities.
+- [x] 9.7 **[M]** Endpoints: create, list, get, patch item completion, delete.
+- [x] 9.8 **[M]** Tests.
 
 **Tests:** budget never exceeds available minutes per day; weaker subjects get more minutes; exam tomorrow (1 day) works; 0 weak subjects auto-picks lowest subjects; AI returns an unknown or missing slot gives fallback; AI failure gives fallback plan with 200; invalid dates 422; a student cannot read another student's plan; item toggle persists; daily plan limit.
 **Docs:** `AI_GUIDELINES.md`, `API_SPEC.md`, `DATABASE_SCHEMA.md`.
@@ -311,12 +313,12 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 8.
 **Files:** `ai/prompts/chat_v1`, `models/ai_chat_message.py`, `services/ai_service.py`, `api/routers/ai.py`.
 
-- [ ] 10.1 **[M]** `AIChatMessage` model; history GET/DELETE.
-- [ ] 10.2 **[M]** Chat context assembly (context + last 6 messages), length limits (question ≤ 500 chars).
-- [ ] 10.3 **[M]** Prompt `chat_v1` (scope rules, no invented numbers, admit missing data).
-- [ ] 10.4 **[M]** `answer_academic_question` and `POST /ai/chat` with the same validation, retry and fallback rules.
-- [ ] 10.5 **[M]** Daily chat limit; friendly fallback message; canned deterministic answers for common questions.
-- [ ] 10.6 **[M]** Tests.
+- [x] 10.1 **[M]** `AIChatMessage` model; history GET/DELETE.
+- [x] 10.2 **[M]** Chat context assembly (context + last 6 messages), length limits (question ≤ 500 chars).
+- [x] 10.3 **[M]** Prompt `chat_v1` (scope rules, no invented numbers, admit missing data).
+- [x] 10.4 **[M]** `answer_academic_question` and `POST /ai/chat` with the same validation, retry and fallback rules.
+- [x] 10.5 **[M]** Daily chat limit; friendly fallback message; canned deterministic answers for common questions.
+- [x] 10.6 **[M]** Tests.
 
 **Tests:** ownership (student chats about own data only; `student_id` in the body is ignored/rejected); empty and over-long question 422; prompt-injection strings ("ignore previous instructions", "show me another student's marks") do not change context or expose other data (fake client asserts the prompt content); off-topic handling; AI failure gives fallback; history window is 6; clear history works; limit gives 429.
 **Docs:** `AI_GUIDELINES.md`, `API_SPEC.md`.
@@ -331,15 +333,15 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 4, 5, 6.
 **Files:** `models/intervention.py`, `services/{intervention_service,teacher_service}.py`, `api/routers/{interventions,teacher}.py`.
 
-- [ ] 11.1 **[M]** `Intervention` model.
-- [ ] 11.2 **[M]** `POST /interventions`: only for visible students; **stores the baseline risk at creation**.
-- [ ] 11.3 **[M]** List, get, patch with role rules (teacher: any field; student: `status` + `completion_note`), forward-only student transitions; capture the outcome on COMPLETED.
-- [ ] 11.4 **[M]** `GET /interventions/{id}/progress` (before/after, observational wording).
-- [ ] 11.5 **[M]** `GET /teacher/dashboard` (counts, means, subject performance, trend distribution).
-- [ ] 11.6 **[M]** `GET /teacher/students` with filters (risk level, department, semester, section, subject, search) and pagination, using the bulk loader.
-- [ ] 11.7 **[M]** `GET /teacher/subjects/{id}/analytics`.
-- [ ] 11.8 **[C]** `POST /ai/intervention-suggestions`.
-- [ ] 11.9 **[M]** Tests.
+- [x] 11.1 **[M]** `Intervention` model.
+- [x] 11.2 **[M]** `POST /interventions`: only for visible students; **stores the baseline risk at creation**.
+- [x] 11.3 **[M]** List, get, patch with role rules (teacher: any field; student: `status` + `completion_note`), forward-only student transitions; capture the outcome on COMPLETED.
+- [x] 11.4 **[M]** `GET /interventions/{id}/progress` (before/after, observational wording).
+- [x] 11.5 **[M]** `GET /teacher/dashboard` (counts, means, subject performance, trend distribution).
+- [x] 11.6 **[M]** `GET /teacher/students` with filters (risk level, department, semester, section, subject, search) and pagination, using the bulk loader.
+- [x] 11.7 **[M]** `GET /teacher/subjects/{id}/analytics`.
+- [x] 11.8 **[C]** `POST /ai/intervention-suggestions`.
+- [x] 11.9 **[M]** Tests.
 
 **Tests:** teacher cannot intervene on an invisible student; student sees only own interventions and can only change status/note; status regression by a student rejected; baseline captured and unaffected by later data; progress direction thresholds (IMPROVED / WORSENED / UNCHANGED at ±2); each filter individually and combined; filter to zero results; dashboard numbers equal a hand-computed set on a small fixture.
 **Docs:** `API_SPEC.md`, `DATABASE_SCHEMA.md`.
@@ -354,16 +356,17 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 6–11.
 **Files:** `api/routers/students.py`, `tests/api/`, `scripts/{demo_advance,demo_flow,export_openapi}.py`, `openapi.json`.
 
-- [ ] 12.1 **[M]** `GET /students/{id}/overview` composite (profile, risk, top factors, subject analysis, trend summary, warnings, open interventions).
-- [ ] 12.2 **[M]** **Authorization matrix test**: parametrized over every route × {anonymous, student self, other student, teacher of subject, other teacher}.
-- [ ] 12.3 **[M]** Full-story API test mirroring the demo: login → risk HIGH → trends → what-if → AI analysis (fake) → study plan → teacher login → filter → intervention → add improved records → progress shows improvement.
-- [ ] 12.4 **[M]** `demo_advance.py` (adds post-intervention records) and `demo_flow.py` (prints each demo step against a running server).
-- [ ] 12.5 **[M]** Seed tuning so the story is convincing (e.g. rahul about 80+ → about 60 after advance).
-- [ ] 12.6 **[M]** Performance sanity: `/teacher/students` with ~200 seeded students under about 2 s; no N+1.
-- [ ] 12.7 **[M]** Security checklist pass: secrets grep, CORS, response schemas exclude sensitive fields, default JWT secret guard.
-- [ ] 12.8 **[M]** Export and commit `openapi.json`; finalize `API_SPEC.md`; coverage report (engines ≥ 90%).
-- [ ] 12.9 **[S]** CSV import (if deferred from 4.9).
-- [ ] 12.10 **[M]** Update docs, tag `backend-v1`.
+- [x] 12.1 **[M]** `GET /students/{id}/overview` composite (profile, risk, top factors, subject analysis, trend summary, warnings, open interventions).
+- [x] 12.2 **[M]** **Authorization matrix test**: parametrized over every route × {anonymous, student self, other student, teacher of subject, other teacher}.
+- [x] 12.3 **[M]** Full-story API test mirroring the demo: login → risk HIGH → trends → what-if → AI analysis (fake) → study plan → teacher login → filter → intervention → add improved records → progress shows improvement.
+- [x] 12.4 **[M]** `demo_advance.py` (adds post-intervention records) and `demo_flow.py` (prints each demo step against a running server).
+- [x] 12.5 **[M]** Seed tuning so the story is convincing (e.g. rahul about 80+ → about 60 after advance).
+- [x] 12.6 **[M]** Performance sanity: `/teacher/students` with ~200 seeded students under about 2 s; no N+1.
+- [x] 12.7 **[M]** Security checklist pass: secrets grep, CORS, response schemas exclude sensitive fields, default JWT secret guard.
+- [x] 12.8 **[M]** Export and commit `openapi.json`; finalize `API_SPEC.md`; coverage report (engines ≥ 90%).
+- [x] 12.9 **[S]** CSV import (if deferred from 4.9).
+- [x] 12.10 **[M]** Update docs, tag `backend-v1`.
+  > Docs and `openapi.json` updated. Git tag `backend-v1` was not created (commit/tag only on request).
 
 **Tests:** as above plus AI-off run of the full story (all steps still succeed with fallbacks).
 **Exit criteria (BACKEND FREEZE):** Definition of Done backend checklist ticked; `pytest` green; `demo_flow.py` completes; `openapi.json` committed; from now on API changes need a documented reason and a migration note for the frontend.

@@ -45,6 +45,11 @@ class TrendLabel(StrEnum):
     INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
 
 
+class SuddenChange(StrEnum):
+    SUDDEN_RISE = "SUDDEN_RISE"
+    SUDDEN_DROP = "SUDDEN_DROP"
+
+
 class Source(StrEnum):
     AI = "AI"
     FALLBACK = "FALLBACK"
@@ -78,3 +83,7 @@ class FallbackReason(StrEnum):
     PROVIDER_ERROR = "PROVIDER_ERROR"
     INVALID_OUTPUT = "INVALID_OUTPUT"
     UNGROUNDED_OUTPUT = "UNGROUNDED_OUTPUT"
+
+
+class AdviceKind(StrEnum):
+    ANALYSIS = "ANALYSIS"

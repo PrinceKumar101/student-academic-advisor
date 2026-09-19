@@ -1,10 +1,21 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.models.user import User
+
+if TYPE_CHECKING:
+    from app.models.ai_advice import AIAdvice
+    from app.models.ai_chat_message import AIChatMessage
+    from app.models.enrollment import Enrollment
+    from app.models.intervention import Intervention
+    from app.models.risk_assessment import RiskAssessment
+    from app.models.semester_result import SemesterResult
+    from app.models.study_habit import StudyHabit
+    from app.models.study_plan import StudyPlan
 
 
 def _utc_now() -> datetime:
@@ -33,3 +44,21 @@ class Student(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="student")
+    enrollments: Mapped[list["Enrollment"]] = relationship(back_populates="student")
+    semester_results: Mapped[list["SemesterResult"]] = relationship(
+        back_populates="student"
+    )
+    study_habit: Mapped["StudyHabit | None"] = relationship(
+        back_populates="student", uselist=False
+    )
+    risk_assessments: Mapped[list["RiskAssessment"]] = relationship(
+        back_populates="student"
+    )
+    ai_advice: Mapped[list["AIAdvice"]] = relationship(back_populates="student")
+    study_plans: Mapped[list["StudyPlan"]] = relationship(back_populates="student")
+    chat_messages: Mapped[list["AIChatMessage"]] = relationship(
+        back_populates="student"
+    )
+    interventions: Mapped[list["Intervention"]] = relationship(
+        back_populates="student"
+    )

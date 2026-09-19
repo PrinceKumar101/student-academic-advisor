@@ -54,15 +54,16 @@ student-academic-advisor/
 │   │   ├── schemas/   Pydantic request/response models
 │   │   ├── api/       deps.py  routers/{health,auth,students,subjects,attendance,
 │   │   │              assessments,risk,trends,analytics,ai,study_plans,
-│   │   │              interventions,teacher}.py
+│   │   │              interventions,teacher,imports}.py
 │   │   ├── services/  academic_data_loader.py risk_service.py trend_service.py
 │   │   │              analytics_service.py whatif_service.py ai_service.py
 │   │   │              study_plan_service.py intervention_service.py teacher_service.py
-│   │   ├── engines/   risk_config.py metrics.py risk_engine.py trend_engine.py
-│   │   │              warnings.py analytics.py whatif.py time_budget.py
+│   │   │              overview_service.py import_service.py
+│   │   ├── engines/   academic_types.py risk_config.py metrics.py risk_engine.py
+│   │   │              trend_engine.py warnings.py analytics.py whatif.py time_budget.py
 │   │   └── ai/        client.py context_builder.py prompts/ schemas.py
 │   │                  validators.py fallback.py
-│   ├── scripts/       reset_db.py seed_demo.py create_teacher.py
+│   ├── scripts/       reset_db.py seed_generator.py seed_demo.py create_teacher.py
 │   │                  demo_advance.py demo_flow.py export_openapi.py
 │   ├── tests/         unit/ api/ ai/ conftest.py
 │   ├── requirements.txt  requirements-dev.txt  pytest.ini
@@ -95,11 +96,14 @@ student-academic-advisor/
 **AI analysis**
 `POST /ai/analysis` → authorize → compute facts (engines) → `context_builder` → hash → cache hit? return. Otherwise check daily limit → AI client (timeout, ≤1 retry) → validate schema and grounding → store → return `{facts, advice, source}`. On any AI failure, use the deterministic fallback with `source: FALLBACK`.
 
+**AI chat**
+`POST /ai/chat` → student role only (caller’s own profile; `student_id` in the body is ignored) → daily USER-message limit → same academic context as analysis → last 6 `ai_chat_messages` + question in `chat_v1` → validate JSON and grounding → persist USER + ASSISTANT rows → `{answer, suggested_followups, source}`. Failure uses `fallback_chat`.
+
 **What-if**
 `POST /risk/{id}/what-if {overrides}` → load real inputs → `dataclasses.replace(inputs, **overrides)` → engine twice (current, simulated) → diff. **Zero DB writes.**
 
 **Auth**
-`POST /auth/login` (form) → verify hash → JWT `{sub, role, exp, iat}` → client sends `Authorization: Bearer` → `get_current_user` → `require_role` / `authorize_student_access`.
+`POST /auth/login` (form) → verify hash → JWT `{sub, role, exp, iat}` (PyJWT, HS256) → client sends `Authorization: Bearer` → `get_current_user` (role from DB, not from the token) → `require_role` / `authorize_student_access`. Teacher visibility: the student is enrolled in a subject the teacher is assigned to, and the assignment `section` is `ALL` or equals the student's section (D4, D18). Public register creates STUDENT only; teachers via `scripts/create_teacher.py`. Teacher writes to subjects, enrollments, attendance and assessments use `authorize_teacher_subject_write` in `api/deps.py` (same assignment + section rule). List pagination is `api/pagination.py`. Engines must load facts only through `services/academic_data_loader.load(student_ids, as_of)` (bulk queries; `as_of` filters attendance and assessment dates).
 
 ---
 
@@ -122,4 +126,19 @@ student-academic-advisor/
 | D13 | 2026-09-19 | Risk snapshots persisted as a side effect of computing risk. No background jobs, no cache invalidation. | Keeps scoring request-driven and testable; avoids a job runner for a college project. |
 | D14 | 2026-09-19 | Escalation reason is per floor that fired (attendance and/or internal). Both reasons are stored when both fire. | `RISK_ENGINE_SPEC` named two floors but only one example string. |
 | D15 | 2026-09-19 | Errors live in `core/errors.py` + `core/exception_handlers.py`; request tracing lives in `core/logging.py` (`RequestIdMiddleware`). All HTTP failures use the `API_SPEC.md` `{error:{code,message,details}}` envelope. | Phase 1 needs one error shape and a request id without adding auth or a logging framework. |
-| D16 | 2026-09-19 | Password hashing uses `pwdlib[argon2]` via `PasswordHash.recommended()` in `core/security.py` (`hash_password` / `verify_password` only). JWT is still deferred to Phase 3. | D10 allowed pwdlib[argon2] or bcrypt; Argon2 is the current recommended hasher and avoids passlib. |
+| D16 | 2026-09-19 | Password hashing uses `pwdlib[argon2]` via `PasswordHash.recommended()` in `core/security.py`. JWT create/decode uses PyJWT HS256 in the same module (`create_access_token` / `decode_access_token`). | D10 named PyJWT and pwdlib; hashing shipped in Phase 2 and tokens in Phase 3. |
+| D17 | 2026-09-19 | Demo seed logic lives in `scripts/seed_generator.py`; `scripts/seed_demo.py` is the CLI. Default `--as-of` is the fixed date `2026-09-19` (not `date.today()`). One password hash is reused for all seeded users. Phase 5.10 writes 4 risk snapshots per student (`as_of` minus 9/6/3/0 weeks). | Tests need an importable generator and date-stable records. Argon2-per-user would make seed slow. `datetime.now()` would break determinism. |
+| D18 | 2026-09-19 | Teacher visibility requires an enrollment on an assigned subject **and** (`teaching_assignments.section` is `ALL` or equals `students.section`). Authorization stays in `api/deps.py`. | D4 named subject+enrollment only; the seed gives `teacher2` CS301 section B, which is meaningless without a section match. |
+| D19 | 2026-09-19 | Creating a subject assigns the creator with section `ALL`. Teacher writes share `authorize_teacher_subject_write`. CSV import (task 4.9) is deferred to Phase 12.9. | POST `/subjects` must leave the creator able to enroll any section; one write rule avoids duplicating D18 in each router. CSV is optional and not needed for engines. |
+| D20 | 2026-09-19 | `StudentAcademicData` and row dataclasses live in `engines/academic_types.py`; the loader re-exports them. | `metrics.py` must stay free of SQLAlchemy; importing the loader would violate the engine import boundary. |
+| D21 | 2026-09-19 | Class analytics uses Pandas (`pandas==2.3.3`) over dataclasses in `engines/analytics.py`. Trend slope is hand-rolled least squares (no NumPy in the trend engine). | Phase 6.6 requires Pandas for class summaries; keeping slope local avoids pulling a numeric stack into every engine. |
+| D22 | 2026-09-19 | Student-vs-class comparison group = same `department`, `semester` and `section`. Hidden unless the group has ≥ 5 students. | Spec required a privacy floor; the natural cohort is the section. |
+| D23 | 2026-09-19 | Seed IMPROVING/DECLINING marks follow the assessment week (not item index); IMPROVING attendance lerps 55→92 so weekly attendance slope clears ±2.0. | Mixed-type overall series stayed STABLE under the official cutoffs; the demo story is visible on weekly attendance. |
+| D24 | 2026-09-19 | What-if `study_hours_per_day` is 0–24. `changed_factors` include `hypothetical` when an override activates a previously `None` component. Optional `as_of` on `POST /risk/{id}/what-if`. | Spec required out-of-range 422 and a hypothetical flag but did not name an hours ceiling or the query date. |
+| D25 | 2026-09-19 | AI provider SDK is `openai==1.109.1`. Extra settings defaults (not required in `.env.example`): `AI_MAX_TOKENS_ANALYSIS=800`, `AI_CACHE_TTL_HOURS=24`, `AI_RETRY_BACKOFF_SECONDS=1`. Chat usage stays 0 until Phase 10. | Phase 8 needs a thin Chat Completions wrapper; extra knobs stay optional so the env template from 0.1 is unchanged. |
+| D26 | 2026-09-19 | Study window is `[as_of, exam_date)` (exam tomorrow = 1 day). Empty `subject_ids` auto-picks up to 3 HIGH_CONCERN / lowest-performance enrolled subjects. Slot text caps: topic 80, activity 200, tips 3×200. Extra setting `AI_MAX_TOKENS_PLAN=1200`. Daily plan limit counts `study_plans` rows. | AI-2 left auto-pick count, window edges and text caps unspecified; Python must still guarantee minutes and dates. |
+| D27 | 2026-09-19 | Chat is student-only and always uses the caller’s facts (`student_id` ignored). Prompt window is the last 6 stored messages. Daily chat limit counts USER `ai_chat_messages` for the UTC day. Extra setting `AI_MAX_TOKENS_CHAT=600`. Follow-ups capped at 3×120. | AI-3 left limit counting, history persistence details and chat token cap unspecified. |
+| D28 | 2026-09-19 | Intervention progress: `change = current_score − baseline_score`; `|change| < 2.0` is UNCHANGED (`engines/intervention_progress.py`). Students may only move PENDING → IN_PROGRESS → COMPLETED. Teachers may reopen. AI-4 suggestions are not persisted and do not use the analysis cache or daily analysis limit. Teacher lists compute live risk in memory (no snapshot writes). | Phase 11 needed a single observational threshold and a cheap suggestions path that does not expand `ai_advice.kind`. |
+| D29 | 2026-09-19 | `GET /students/{id}/overview` is a composite of profile, compact risk, top factors, subject analysis, trend labels/slopes, warnings and open (PENDING/IN_PROGRESS) interventions. Risk persistence uses the existing snapshot rule. | Phase 12 dashboard contract; avoids a second risk formula. |
+| D30 | 2026-09-19 | CSV import is `POST /imports/attendance` and `POST /imports/assessments` (multipart `file`, `dry_run` default true). Parsing uses the stdlib `csv` module, not Pandas. Teacher write rules are applied per row; commit is all-or-nothing. | Completes deferred 4.9 without adding a dependency. Class analytics still uses Pandas (D21). |
+| D31 | 2026-09-19 | Teacher list/dashboard snapshot history is loaded in one query (`load_snapshots_bulk`). Seed story marks/attendance were steepened so Rahul’s live score is ≥ 80; `scripts/demo_advance.py` adds 4 recovery weeks so later risk lands about 50–70. | Phase 12.5/12.6: demo story and N+1 on `/teacher/students`. |
