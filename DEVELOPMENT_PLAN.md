@@ -79,8 +79,8 @@ Parallel groups (only useful if more than one person or agent works at once; a s
 | Folder structure, layering, new dependency, design decision | `ARCHITECTURE.md` (Decision Log) |
 | AI prompts, schemas, limits, failure behaviour | `AI_GUIDELINES.md` |
 | Risk weights, thresholds, formulas | `RISK_ENGINE_SPEC.md` (and bump `config_version`) |
-| Any task status | `DEVELOPMENT_PLAN.md` |
-| Phase completed | `CLAUDE_CONTEXT.md` |
+| Any task status | `DEVELOPMENT_PLAN.md` and `.cursor/indexes/PHASE_TRACK.md` |
+| Phase completed | `CLAUDE_CONTEXT.md` and `.cursor/indexes/PHASE_TRACK.md` |
 
 ### 2.3 Global edge cases (each phase checks the ones that apply)
 
@@ -103,7 +103,7 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Files:** repo root docs, `.cursor/rules/project.mdc`, `.gitignore`, `.env.example`.
 
 - [x] 0.1 **[M]** Create the repo skeleton, `.gitignore`, `.env.example`, `project.mdc` (agent protocol), README stub, `git init`.
-- [ ] 0.2 **[M]** Split `MASTER_DESIGN.md` into `PROJECT_SPEC.md`, `ARCHITECTURE.md` (with a Decision Log), `DATABASE_SCHEMA.md`, `API_SPEC.md`, `AI_GUIDELINES.md`, `RISK_ENGINE_SPEC.md`. Add `UI_GUIDELINES.md` stub ("deferred to Phase 17"). Place `DEVELOPMENT_PLAN.md` and `CLAUDE_CONTEXT.md`.
+- [x] 0.2 **[M]** Split `MASTER_DESIGN.md` into `PROJECT_SPEC.md`, `ARCHITECTURE.md` (with a Decision Log), `DATABASE_SCHEMA.md`, `API_SPEC.md`, `AI_GUIDELINES.md`, `RISK_ENGINE_SPEC.md`. Add `UI_GUIDELINES.md` stub ("deferred to Phase 17"). Place `DEVELOPMENT_PLAN.md` and `CLAUDE_CONTEXT.md`.
 - [ ] 0.3 **[M]** Consistency review: check that endpoints, tables and enums agree across all docs. List open questions.
 
 **Tests:** none (documentation). **Docs:** all created.

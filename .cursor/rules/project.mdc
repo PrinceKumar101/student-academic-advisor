@@ -5,7 +5,8 @@ alwaysApply: true
 
 SOURCES OF TRUTH (read the relevant ones before every task)
 SRS.md, PROJECT_SPEC.md, ARCHITECTURE.md, DATABASE_SCHEMA.md, API_SPEC.md,
-AI_GUIDELINES.md, RISK_ENGINE_SPEC.md. Current status: CLAUDE_CONTEXT.md and DEVELOPMENT_PLAN.md.
+AI_GUIDELINES.md, RISK_ENGINE_SPEC.md. Current status: CLAUDE_CONTEXT.md,
+DEVELOPMENT_PLAN.md and .cursor/indexes/PHASE_TRACK.md.
 
 ARCHITECTURE RULES
 - Frontend and UI are built LAST (Phases 13+). Do not create frontend code before the Backend Freeze.
@@ -31,9 +32,18 @@ WORKING RULES
 7. Update docs per this table:
    DB change -> DATABASE_SCHEMA.md | API change -> API_SPEC.md | structure/dependency/decision -> ARCHITECTURE.md
    AI behaviour -> AI_GUIDELINES.md | risk formula -> RISK_ENGINE_SPEC.md (+ bump config_version)
-   task done -> tick DEVELOPMENT_PLAN.md | phase done -> update CLAUDE_CONTEXT.md
+   task done -> tick DEVELOPMENT_PLAN.md and update .cursor/indexes/PHASE_TRACK.md
+   phase done -> update CLAUDE_CONTEXT.md and mark the phase complete in
+   .cursor/indexes/PHASE_TRACK.md (date, status, current phase/task)
 8. If the spec is ambiguous in a way that affects architecture, STOP and ask. Otherwise choose the
    simplest option and record it.
+
+PHASE INDEX
+- The completed-phase tracker is `.cursor/indexes/PHASE_TRACK.md`.
+- After every completed task, update that file: tick the task, set Current task
+  and Latest completed task.
+- After every completed phase, mark the phase [x], set Completed on, Latest
+  completed phase and Current phase. Do not skip this update.
 
 FINAL REPORT FORMAT (end every task with this)
 - Changed files: (list)

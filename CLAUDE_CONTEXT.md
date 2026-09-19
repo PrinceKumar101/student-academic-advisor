@@ -2,8 +2,8 @@
 
 *Keep under ~60 lines. Overwrite sections; do not append history. Update at the end of every phase.*
 
-**Current Phase:** 0: Planning & Documentation (plan produced, awaiting approval)
-**Current Task:** Review and approve the plan; then run Prompt 0.1
+**Current Phase:** 0: Planning & Documentation
+**Current Task:** 0.3 Consistency review
 **Last updated:** 2026-09-19
 
 ## Project in one paragraph
@@ -13,17 +13,17 @@ AI-assisted academic decision-support system. Python computes all facts (attenda
 **Backend first (Phases 0–12, then FREEZE). Frontend and UI last (Phases 13–19).** No frontend code before the backend freeze.
 
 ## Completed
-- Planning documents produced: MASTER_DESIGN.md, DEVELOPMENT_PLAN.md, CODING_PROMPTS.md
+- 0.1 Repo skeleton, .gitignore, .env.example, project.mdc, README stub
+- 0.2 Documentation set: PROJECT_SPEC, ARCHITECTURE (D1–D13), DATABASE_SCHEMA, API_SPEC, AI_GUIDELINES, RISK_ENGINE_SPEC, UI_GUIDELINES stub; MASTER_DESIGN archived; phase index at `.cursor/indexes/PHASE_TRACK.md`
 
 ## In Progress
-- Nothing
+- 0.3 Consistency review (next)
 
 ## Next
-- 0.1 Repo skeleton, .gitignore, .env.example, project.mdc
-- 0.2 Split MASTER_DESIGN into ARCHITECTURE / DATABASE_SCHEMA / API_SPEC / AI_GUIDELINES / RISK_ENGINE_SPEC / PROJECT_SPEC
-- 0.3 Consistency review
+- 0.3 Consistency review: list any endpoint, table, enum or number that disagrees across docs. Do not fix; report.
+- Then Phase 1 backend setup (Prompt 1.1)
 
-## Important Decisions (defaults, pending approval)
+## Important Decisions
 - D2 Public register = STUDENT only; teachers via `scripts/create_teacher.py`
 - D3 Teachers enter attendance/marks; students read-only (except habits, plans, chat, intervention status)
 - D4 Teacher visibility via `teaching_assignments` + enrollments
@@ -39,7 +39,7 @@ AI-assisted academic decision-support system. Python computes all facts (attenda
 - None yet
 
 ## Recent Changes
-- 2026-09-19: Plan created; roadmap reordered so all frontend work is in Phases 13–19
+- 2026-09-19: 0.2 split MASTER_DESIGN into the repo docs; added `.cursor/indexes/PHASE_TRACK.md`
 
-## Key Files (once created)
-`backend/app/engines/` (pure logic) · `backend/app/services/ai_service.py` · `backend/app/api/deps.py` · `backend/tests/` · `openapi.json` (after freeze)
+## Key Files
+`PROJECT_SPEC.md` · `ARCHITECTURE.md` · `DATABASE_SCHEMA.md` · `API_SPEC.md` · `AI_GUIDELINES.md` · `RISK_ENGINE_SPEC.md` · `.cursor/indexes/PHASE_TRACK.md`
