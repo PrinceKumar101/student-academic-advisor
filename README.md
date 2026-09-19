@@ -1,82 +1,171 @@
 # Student Academic Advisor
 
-Student Academic Advisor is an AI-assisted academic decision-support system. Python computes attendance, risk scores, trends and what-if results; an optional AI API explains those facts and drafts study-plan or chat text, with a deterministic fallback when the AI is unavailable.
+AI-assisted academic **decision-support** for students and teachers. Python computes every academic fact (attendance %, risk 0–100, trends, what-if). An optional OpenAI call (backend only) writes explanations, study-plan wording and chat answers. If the AI is off or fails, a deterministic fallback still returns useful text. The UI never calculates percentages, risk or trends.
 
-## Backend setup (Phase 1)
+**Principle:** Python computes. AI explains.
 
-Requires **Python 3.11+**. This repo uses a local virtualenv under `backend/.venv` (not committed).
+## Requirements
+
+| Layer | Need |
+|---|---|
+| Backend | Python **3.11+** |
+| Frontend | Node.js **20+** |
+| Database | SQLite (file created by seed; no extra server) |
+| Optional | `OPENAI_API_KEY` for live AI; leave blank for fallbacks |
+
+## Quick start (fresh clone)
+
+From the repository root:
 
 ```bash
-# from the repository root
-cp .env.example backend/.env   # edit secrets later; APP_ENV=dev is fine for local work
+# 1. Backend env
+cp .env.example backend/.env
+# APP_ENV=dev is fine locally. JWT_SECRET_KEY=change-me is allowed only in dev.
 
+# 2. Python env and install
 cd backend
-python3.12 -m venv .venv       # or python3.11
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
+python3.12 -m venv .venv          # or python3.11
+source .venv/bin/activate         # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 
-# run the API (from the backend/ directory)
-uvicorn app.main:app --reload
+# 3. Schema + demo data
+python -m scripts.reset_db
+python -m scripts.seed_demo --as-of 2026-09-19
+
+# 4. API
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Then open:
-
-- Health: http://127.0.0.1:8000/api/v1/health → `{"status":"ok"}`
-- Interactive docs: http://127.0.0.1:8000/docs
+In a second terminal:
 
 ```bash
-# tests and lint (from backend/)
+cd frontend
+cp .env.example .env              # blank VITE_API_BASE_URL → Vite proxies /api → :8000
+npm install
+npm run dev                       # http://127.0.0.1:5173
+```
+
+Then open http://127.0.0.1:5173 and log in with a demo account below.
+
+- Health: http://127.0.0.1:8000/api/v1/health → `{"status":"ok"}`
+- Swagger: http://127.0.0.1:8000/docs (Authorize with email as `username`)
+
+If `APP_ENV` is not `dev`, the app refuses to start with the placeholder JWT secret.
+
+## Demo logins
+
+Password for **all** seeded accounts: `Demo@1234`
+
+| Email | Role | Use |
+|---|---|---|
+| `rahul@demo.edu` | Student | Main story (HIGH risk, declining attendance) |
+| `teacher1@demo.edu` | Teacher | CS301–CS303, section ALL |
+| `teacher2@demo.edu` | Teacher | CS304–CS305 ALL, CS301 section B |
+| `newstudent@demo.edu` | Student | No academic rows |
+| `zeroclass@demo.edu` | Student | Zero classes held |
+| `missingassign@demo.edu` | Student | Many MISSING assignments |
+
+Public register creates a **student** only. Extra teachers:
+
+```bash
+# from backend/ with venv active
+python -m scripts.create_teacher \
+  --email teacher3@demo.edu --password 'Demo@1234' \
+  --full-name 'Teacher Three' --department CS
+```
+
+Seed scale: 43 students, 5 subjects (CS301–CS305), 2 teachers. If `--as-of` is omitted, the seed uses `2026-09-19`.
+
+### Header “As of” date
+
+The UI sends `?as_of=YYYY-MM-DD` on API calls. After you run `demo_advance`, set **As of** to the printed date so recovery weeks after today appear.
+
+## Tests and lint
+
+```bash
+# backend/ (venv active)
 pytest
 ruff check .
 
-# rebuild schema and load the demo dataset (from backend/)
-python -m scripts.reset_db
-python -m scripts.seed_demo --as-of 2026-09-19
+# frontend/
+npm test
+npm run typecheck
 ```
 
-Demo password for all seeded accounts is `Demo@1234`. Logins include `rahul@demo.edu`, `teacher1@demo.edu`, `teacher2@demo.edu`, plus edge users `newstudent@demo.edu`, `zeroclass@demo.edu`, `missingassign@demo.edu`. If `--as-of` is omitted, the seed uses `2026-09-19`.
-
-In `/docs`, use **Authorize** with OAuth2 password flow (`username` = email) against `POST /api/v1/auth/login`.
+Tests never call the real OpenAI API (fake client). Optional live smoke (never in CI):
 
 ```bash
-# create an extra teacher (not available via public register)
-python -m scripts.create_teacher --email teacher3@demo.edu --password 'Demo@1234' --full-name 'Teacher Three' --department CS
-```
-
-```bash
-# after seed: add Rahul’s post-intervention recovery weeks
-python -m scripts.demo_advance --email rahul@demo.edu
-
-# print the demo story against a running server
-python -m scripts.demo_flow --base-url http://127.0.0.1:8000
-
-# refresh the committed OpenAPI document (repo root)
-python -m scripts.export_openapi
-```
-
-If `APP_ENV` is anything other than `dev`, `JWT_SECRET_KEY` must not be the placeholder `change-me` or the app will refuse to start.
-
-Optional AI analysis (`POST /api/v1/ai/analysis`) works without a key and returns `source: FALLBACK`. To try the real provider locally (never in CI):
-
-```bash
-# from backend/, with OPENAI_API_KEY set in backend/.env
+# backend/, OPENAI_API_KEY set in backend/.env
 python -m scripts.ai_smoke_test
 ```
+
+Regenerate TypeScript types after an API change:
+
+```bash
+# repo root: refresh committed OpenAPI, then frontend types
+cd backend && python -m scripts.export_openapi
+cd ../frontend && npm run generate:types
+```
+
+## Demo story (short)
+
+Full click-by-click script: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md). Observed values from the 2026-09-19 seed (SRS example 82 is illustrative; live Rahul is **84.1 HIGH**):
+
+1. Log in as Rahul → dashboard HIGH, top factors, warnings.
+2. Risk + performance pages (attendance **DECLINING**).
+3. What-if: attendance 80, internal 60 → **53.9 MEDIUM**, not persisted.
+4. AI advisor + study planner (fallback if no key).
+5. Teacher: filter HIGH + search Rahul → create intervention.
+6. Advance data, then set **As of** to the new date → score drops (e.g. **68.5 HIGH**).
+
+```bash
+# backend/ — add Rahul’s recovery weeks
+python -m scripts.demo_advance --email rahul@demo.edu
+
+# print the 11-step API story against a running server
+python -m scripts.demo_flow --base-url http://127.0.0.1:8000
+```
+
+Phase 16 browser checklist: [`docs/FUNCTIONAL_DEMO.md`](docs/FUNCTIONAL_DEMO.md).
+
+## Project layout
+
+```text
+backend/app/     FastAPI routers → services → engines (pure) / ai/
+backend/scripts/ reset_db, seed_demo, create_teacher, demo_*, export_openapi
+frontend/src/    React + TypeScript UI (display only)
+openapi.json     Frozen API contract
+```
+
+Engines (`risk`, `trend`, `whatif`, `time_budget`, …) import no FastAPI, SQLAlchemy or `ai/`. Risk, trends and what-if never call the AI.
 
 ## Documents
 
 | File | Purpose |
 |---|---|
-| `SRS.md` | Primary source of truth: problem, features and original requirements |
-| `PROJECT_SPEC.md` | Concise project definition, stack, principle and constraints |
-| `ARCHITECTURE.md` | Layers, folder structure, data flows and Decision Log (D1–D31) |
-| `DATABASE_SCHEMA.md` | Tables, indexes and integrity rules |
-| `API_SPEC.md` | Conventions, endpoints (with planned phase) and key contracts |
-| `AI_GUIDELINES.md` | AI capabilities, validation, fallback, cost limits and privacy |
-| `RISK_ENGINE_SPEC.md` | Risk, trend, warning and analytics formulas; cases R1–R13, W1 |
-| `UI_GUIDELINES.md` | UI design notes (deferred to Phase 17) |
-| `DEVELOPMENT_PLAN.md` | Phases, tasks, verification and Definition of Done |
-| `CLAUDE_CONTEXT.md` | Short session snapshot (current phase and decisions) |
-| `docs/archive/MASTER_DESIGN.md` | Archived master design this documentation set was split from |
-| `docs/CONSISTENCY_REVIEW.md` | Phase 0.3 living-doc consistency report |
-| `.cursor/indexes/PHASE_TRACK.md` | Completed-phase tracker for the coding agent |
+| `SRS.md` | Original requirements |
+| `PROJECT_SPEC.md` | Scope, stack, constraints |
+| `ARCHITECTURE.md` | Layers, flows, Decision Log |
+| `DATABASE_SCHEMA.md` | Tables and seed scale |
+| `API_SPEC.md` | Endpoints and contracts |
+| `AI_GUIDELINES.md` | Prompts, validation, fallback, limits |
+| `RISK_ENGINE_SPEC.md` | Formulas; cases R1–R13, W1 |
+| `UI_GUIDELINES.md` | Design tokens and a11y rules |
+| `DEVELOPMENT_PLAN.md` | Phases and Definition of Done |
+| `CLAUDE_CONTEXT.md` | Short session snapshot |
+| `docs/DEMO_SCRIPT.md` | 11-step viva/demo script |
+| `docs/VIVA_NOTES.md` | Likely questions |
+| `docs/FINAL_REPORT.md` | Written report |
+| `docs/PRESENTATION_OUTLINE.md` | Slide outline |
+| `docs/DEFINITION_OF_DONE.md` | Final DoD run |
+| `docs/DOC_VERIFICATION.md` | Docs vs code check |
+| `docs/FUNCTIONAL_DEMO.md` | Phase 16 browser checklist |
+| `docs/UI_POLISH.md` | Phase 18 a11y / polish notes |
+| `docs/screenshots/` | Demo captures |
+| `.cursor/indexes/PHASE_TRACK.md` | Phase/task tracker |
+
+## What this is not
+
+No custom ML, no Docker/Alembic in v1, no notifications or PDF export. Demo data is synthetic. Do not load real student records without institutional approval.
+
+JWT is stored in `localStorage` (`saa_access_token`) for the college demo. A 401 clears it and returns to `/login`.

@@ -2,59 +2,47 @@
 
 *Keep under ~60 lines. Overwrite sections; do not append history. Update at the end of every phase.*
 
-**Current Phase:** 13: Frontend foundation
-**Current Task:** 13.1 Vite + React + TypeScript + Tailwind + React Router scaffold
+**Current Phase:** 19 complete (all planned phases 0–19 done)
+**Current Task:** none
 **Last updated:** 2026-09-19
 
 ## Project in one paragraph
-AI-assisted academic decision-support system. Python computes all facts (attendance %, deterministic risk score 0–100, trends, what-if). The AI API (OpenAI, backend only) only writes explanations, recommendations, study-plan text and chat answers, and always has a deterministic fallback. Stack: FastAPI + SQLAlchemy + SQLite (backend); React + TS + Vite + Tailwind + Recharts (frontend). No custom ML.
+AI-assisted academic decision-support system. Python computes all facts (attendance %, deterministic risk score 0–100, trends, what-if). The AI API (OpenAI, backend only) only writes explanations, recommendations, study-plan text and chat answers, and always has a deterministic fallback. Stack: FastAPI + SQLAlchemy + SQLite (backend); React + TS + Vite + Tailwind (frontend; SVG charts, no Recharts). No custom ML.
 
 ## Ordering rule
-**Backend first (Phases 0–12, then FREEZE). Frontend and UI last (Phases 13–19).** Backend freeze is in place: API changes need a documented reason.
+**Backend first (Phases 0–12, then FREEZE). Frontend and UI last (Phases 13–19).** All stages including final docs are complete.
 
 ## Completed
-- Phase 0 Planning & Documentation (0.1–0.3)
-- Phase 1 Backend Setup (1.1–1.4)
-- Phase 2 Database & seed data (2.1–2.7)
-- Phase 3 Authentication & authorization (3.1–3.7)
-- Phase 4 Academic data APIs (4.1–4.9; CSV via 12.9)
-- Phase 5 Academic risk engine (5.1–5.10)
-- Phase 6 Trends, subject analysis, early warnings (6.1–6.8)
-- Phase 7 What-if simulator (7.1–7.4)
-- Phase 8 AI service (analysis) (8.1–8.10)
-- Phase 9 AI study planner (9.1–9.8)
-- Phase 10 AI academic assistant (10.1–10.6)
-- Phase 11 Interventions & teacher APIs (11.1–11.9)
-- Phase 12 Backend integration, hardening, freeze (12.1–12.10)
+- Phases 0–12 backend (freeze)
+- Phases 13–16 frontend functional (freeze)
+- Phase 17 UI design
+- Phase 18 UI polish
+- Phase 19 final README, demo script, viva notes, report, slides, screenshots, DoD
 
 ## In Progress
-- Phase 13 Frontend foundation (next: Prompt 13.1)
+- None
 
 ## Next
-- 13.1 Vite + React + TypeScript + Tailwind + React Router scaffold
+- Optional: git commit + tags `v1.0` / `backend-v1` / `frontend-functional` on request
 
 ## Important Decisions
 - D2 Public register = STUDENT only; teachers via `scripts/create_teacher.py`
 - D3 Teachers enter attendance/marks; students read-only (except habits, plans, chat, intervention status)
-- D4 / D18 Teacher visibility: teaching assignment + enrollment; section `ALL` or student section match
-- D5 Attendance = weekly counts; % always computed
-- D6 Risk: SRS weights; INSUFFICIENT_DATA if available weight < 0.40; floors
-- D7 No Alembic (`reset_db.py` + seed)
-- D8 / D26 Hybrid study plan: Python budget + AI text; auto-pick ≤3; window `[as_of, exam_date)`
-- D10 / D16 PyJWT HS256 + pwdlib[argon2]; authz only in `api/deps.py`
-- D13 Risk snapshots persisted as a side effect
-- D17 Seed `scripts/seed_generator.py`; default as_of `2026-09-19`
-- D25 `openai==1.109.1`; analysis cache 24 h
-- D27 Chat student-only; `student_id` ignored; last 6 messages; USER rows count toward daily limit
-- D28 Intervention progress ±2 UNCHANGED; student status forward-only; AI-4 not persisted/cached
-- D29 Overview composite; D30 CSV import stdlib; D31 bulk snapshots + Rahul ≥80 then ~50–70 after advance
+- D32 Vite + React 18 + Tailwind 3 + RR6; `/api` proxy; JWT in `localStorage`; types from `openapi.json`
+- D33 Trend charts plot backend `{on,value}` points (SVG, not Recharts)
+- D34 Teacher list sorts the current page by backend `risk_score` (API has no sort query)
+- D35 Frontend forwards `as_of` from `?as_of=` / header date field; Phase 16 checklist is `docs/FUNCTIONAL_DEMO.md` (no Playwright)
+- D36 Academic paper/ink design system; risk colour + marker + printed level
+- D37 Phase 18 polish without axe-core; `RiskGauge` displays backend score width only
 
 ## Known Issues
-- Git tag `backend-v1` not created (commit/tag only on request).
+- Git tags `backend-v1`, `frontend-functional`, `v1.0` not created (commit/tag only on request).
 - Starlette TestClient warns that `httpx` is deprecated in favor of `httpx2`; not added.
+- Live seed Rahul is 84.1 HIGH (SRS example 82); overall assessment trend STABLE, attendance DECLINING.
+- Screenshot PNGs may show webfont glyph artifacts; live UI text is correct (`docs/screenshots/README.md`).
 
 ## Recent Changes
-- 2026-09-19: Phase 12 complete — overview, auth matrix, full-story test, demo scripts, CSV import, `openapi.json`, backend freeze.
+- 2026-09-19: Phase 19 — submission docs, demo script, viva notes, screenshots.
 
 ## Key Files
-`openapi.json` · `API_SPEC.md` · `backend/app/services/overview_service.py` · `backend/scripts/demo_flow.py` · `.cursor/indexes/PHASE_TRACK.md`
+`README.md` · `docs/DEMO_SCRIPT.md` · `docs/VIVA_NOTES.md` · `docs/FINAL_REPORT.md` · `docs/DEFINITION_OF_DONE.md`

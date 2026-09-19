@@ -386,13 +386,13 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 12.
 **Files:** `frontend/` (`src/{api,auth,components,pages,routes,types,lib}`), `vite.config.ts`, `tailwind.config`.
 
-- [ ] 13.1 **[M]** Vite + React + TypeScript + Tailwind + React Router scaffold; proxy or CORS to the backend.
-- [ ] 13.2 **[M]** Generate TS types from `openapi.json` (`openapi-typescript`, dev dependency only) into `src/types/api.ts`.
-- [ ] 13.3 **[M]** API client: base URL from env, token attach, 401 → logout/redirect, error normalization to the standard error shape.
-- [ ] 13.4 **[M]** Auth context, login and register pages, token storage, `ProtectedRoute` and role routes.
-- [ ] 13.5 **[M]** Layout skeleton with role-based nav (plain utility classes only).
-- [ ] 13.6 **[M]** Basic shared components: `Loading`, `ErrorMessage`, `EmptyState`, `SimpleTable`, `RiskBadge` (text label always shown, never colour only).
-- [ ] 13.7 **[M]** Vitest + React Testing Library; tests for the auth guard, the API client (401 handling) and `RiskBadge`.
+- [x] 13.1 **[M]** Vite + React + TypeScript + Tailwind + React Router scaffold; proxy or CORS to the backend.
+- [x] 13.2 **[M]** Generate TS types from `openapi.json` (`openapi-typescript`, dev dependency only) into `src/types/api.ts`.
+- [x] 13.3 **[M]** API client: base URL from env, token attach, 401 → logout/redirect, error normalization to the standard error shape.
+- [x] 13.4 **[M]** Auth context, login and register pages, token storage, `ProtectedRoute` and role routes.
+- [x] 13.5 **[M]** Layout skeleton with role-based nav (plain utility classes only).
+- [x] 13.6 **[M]** Basic shared components: `Loading`, `ErrorMessage`, `EmptyState`, `SimpleTable`, `RiskBadge` (text label always shown, never colour only).
+- [x] 13.7 **[M]** Vitest + React Testing Library; tests for the auth guard, the API client (401 handling) and `RiskBadge`.
 
 **Tests:** login stores the token; logout clears it; student cannot open a teacher route; 401 redirects; errors show messages.
 **Docs:** `README.md` (frontend run), `ARCHITECTURE.md` (frontend structure).
@@ -407,16 +407,16 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 13.
 **Files:** `src/pages/student/*`, `src/api/*`, `src/components/charts/*`.
 
-- [ ] 14.1 **[M]** Dashboard from `/students/me/overview`: risk score + level, top factors, warnings, open interventions.
-- [ ] 14.2 **[M]** Risk page: component table with weights, contributions and notes; completeness and flags shown.
-- [ ] 14.3 **[M]** Performance page: Recharts line charts for assessment and attendance trends, trend labels.
-- [ ] 14.4 **[M]** Subjects page: subject analysis table with bands.
-- [ ] 14.5 **[M]** What-If page: inputs, submit, current vs simulated, difference, changed factors.
-- [ ] 14.6 **[M]** AI Advisor page: analysis (facts panel separate from AI advice panel, fallback banner) and chat.
-- [ ] 14.7 **[M]** Study Planner page: form, generated plan, tick items.
-- [ ] 14.8 **[M]** Interventions page: list, status update, progress.
-- [ ] 14.9 **[M]** Profile page + study-habits form.
-- [ ] 14.10 **[M]** Tests for What-If, AI Advisor (including the fallback banner) and Study Planner (mocked API).
+- [x] 14.1 **[M]** Dashboard from `/students/me/overview`: risk score + level, top factors, warnings, open interventions.
+- [x] 14.2 **[M]** Risk page: component table with weights, contributions and notes; completeness and flags shown.
+- [x] 14.3 **[M]** Performance page: Recharts line charts for assessment and attendance trends, trend labels.
+- [x] 14.4 **[M]** Subjects page: subject analysis table with bands.
+- [x] 14.5 **[M]** What-If page: inputs, submit, current vs simulated, difference, changed factors.
+- [x] 14.6 **[M]** AI Advisor page: analysis (facts panel separate from AI advice panel, fallback banner) and chat.
+- [x] 14.7 **[M]** Study Planner page: form, generated plan, tick items.
+- [x] 14.8 **[M]** Interventions page: list, status update, progress.
+- [x] 14.9 **[M]** Profile page + study-habits form.
+- [x] 14.10 **[M]** Tests for What-If, AI Advisor (including the fallback banner) and Study Planner (mocked API).
 
 **Tests:** each page renders loading, empty, error and success; What-If sends only changed values; fallback banner shown when `source=FALLBACK`; plan tick calls PATCH.
 **Exit criteria:** the student half of the demo story works in the browser against the real backend.
@@ -430,13 +430,14 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 13.
 **Files:** `src/pages/teacher/*`.
 
-- [ ] 15.1 **[M]** Teacher dashboard (counts, means, subject performance, trend distribution).
-- [ ] 15.2 **[M]** Student list with all filters, pagination, sortable by risk.
-- [ ] 15.3 **[M]** Student detail: overview, risk, trends, warnings, AI analysis (optional), interventions.
-- [ ] 15.4 **[M]** Create intervention form (from the student detail page).
-- [ ] 15.5 **[M]** Intervention tracking page with status filter and before/after progress.
-- [ ] 15.6 **[S]** Subject analytics page.
-- [ ] 15.7 **[M]** Tests for filters and the intervention form.
+- [x] 15.1 **[M]** Teacher dashboard (counts, means, subject performance, trend distribution).
+- [x] 15.2 **[M]** Student list with all filters, pagination, sortable by risk.
+  > Sort is the current page by backend `risk_score` (D34); API has no sort query.
+- [x] 15.3 **[M]** Student detail: overview, risk, trends, warnings, AI analysis (optional), interventions.
+- [x] 15.4 **[M]** Create intervention form (from the student detail page).
+- [x] 15.5 **[M]** Intervention tracking page with status filter and before/after progress.
+- [x] 15.6 **[S]** Subject analytics page.
+- [x] 15.7 **[M]** Tests for filters and the intervention form.
 
 **Tests:** filter combinations produce the right query params; empty results state; create intervention shows validation errors from the API.
 **Exit criteria:** teacher half of the demo works in the browser.
@@ -448,11 +449,16 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Objective:** The full demo story runs in the browser with an unpolished UI.
 **Depends on:** 14, 15.
 
-- [ ] 16.1 **[M]** Manual run of the complete demo script (Demo section of the SRS) against the real backend; log defects.
-- [ ] 16.2 **[M]** Fix defects; regenerate types if the backend changed (documented).
-- [ ] 16.3 **[M]** AI-off run: disable the key and confirm all pages still work with fallbacks.
-- [ ] 16.4 **[S]** One Playwright happy-path test for the demo story (optional tool; else keep a manual checklist in `docs/`).
-- [ ] 16.5 **[M]** Functional freeze: tag `frontend-functional`.
+- [x] 16.1 **[M]** Manual run of the complete demo script (Demo section of the SRS) against the real backend; log defects.
+  > Log: `docs/FUNCTIONAL_DEMO.md`. Rahul 84.1 HIGH; what-if 53.9 MEDIUM; AI fallbacks; teacher HIGH+search finds Rahul.
+- [x] 16.2 **[M]** Fix defects; regenerate types if the backend changed (documented).
+  > Forbidden page links + `as_of` forwarding (D35). Types not regenerated (API unchanged).
+- [x] 16.3 **[M]** AI-off run: disable the key and confirm all pages still work with fallbacks.
+  > Blank `OPENAI_API_KEY`; analysis, chat, planner, suggestions all FALLBACK / NOT_CONFIGURED.
+- [x] 16.4 **[S]** One Playwright happy-path test for the demo story (optional tool; else keep a manual checklist in `docs/`).
+  > Manual checklist only (`docs/FUNCTIONAL_DEMO.md`); no Playwright dependency (D35).
+- [x] 16.5 **[M]** Functional freeze: tag `frontend-functional`.
+  > Docs and checklist complete. Git tag `frontend-functional` not created (commit/tag only on request).
 
 **Exit criteria:** every Definition-of-Done functional item is ticked; UI is ugly but complete.
 **Risks:** starting design early. Do not.
@@ -464,13 +470,13 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Objective:** Professional, academic, data-focused design system applied everywhere.
 **Depends on:** 16.
 
-- [ ] 17.1 **[M]** Design direction + `UI_GUIDELINES.md` (principles, tokens, accessibility rules).
-- [ ] 17.2 **[M]** Tailwind theme: colours (risk semantic colours plus a non-colour cue), typography, spacing, radii.
-- [ ] 17.3 **[M]** Component library: Button, Card, Badge, Table, Input, Select, Tabs, Modal, Alert, Skeleton.
-- [ ] 17.4 **[M]** App shell and navigation (role-aware, responsive).
-- [ ] 17.5 **[M]** Restyle student pages (dashboard hierarchy: "How am I doing?" visible within seconds).
-- [ ] 17.6 **[M]** Restyle teacher pages.
-- [ ] 17.7 **[M]** Chart styling consistency.
+- [x] 17.1 **[M]** Design direction + `UI_GUIDELINES.md` (principles, tokens, accessibility rules).
+- [x] 17.2 **[M]** Tailwind theme: colours (risk semantic colours plus a non-colour cue), typography, spacing, radii.
+- [x] 17.3 **[M]** Component library: Button, Card, Badge, Table, Input, Select, Tabs, Modal, Alert, Skeleton.
+- [x] 17.4 **[M]** App shell and navigation (role-aware, responsive).
+- [x] 17.5 **[M]** Restyle student pages (dashboard hierarchy: "How am I doing?" visible within seconds).
+- [x] 17.6 **[M]** Restyle teacher pages.
+- [x] 17.7 **[M]** Chart styling consistency.
 
 **Exit criteria:** all pages use the shared components; no ad-hoc styling left; visual review passes.
 
@@ -481,11 +487,13 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Objective:** Presentation-ready quality.
 **Depends on:** 17.
 
-- [ ] 18.1 **[M]** Responsive behaviour (mobile, tablet, desktop).
-- [ ] 18.2 **[M]** Loading skeletons, empty states, error states on every data view.
-- [ ] 18.3 **[M]** Accessibility: keyboard navigation, focus styles, labels, contrast, ARIA for charts and tables (run axe or Lighthouse).
-- [ ] 18.4 **[S]** Useful micro-interactions only (risk gauge transition, list transitions).
-- [ ] 18.5 **[M]** Consistency audit (spacing, wording, disclaimers such as "risk indicator, not a prediction").
+- [x] 18.1 **[M]** Responsive behaviour (mobile, tablet, desktop).
+  > Overflow clipped at the page; tables scroll locally; hamburger nav under `md`.
+- [x] 18.2 **[M]** Loading skeletons, empty states, error states on every data view.
+- [x] 18.3 **[M]** Accessibility: keyboard navigation, focus styles, labels, contrast, ARIA for charts and tables (run axe or Lighthouse).
+  > RTL assertions + `docs/UI_POLISH.md`; no axe-core dependency (D37).
+- [x] 18.4 **[S]** Useful micro-interactions only (risk gauge transition, list transitions).
+- [x] 18.5 **[M]** Consistency audit (spacing, wording, disclaimers such as "risk indicator, not a prediction").
 
 **Exit criteria:** no horizontal scroll at 375 px; accessibility checks show no critical issues; the demo path is smooth.
 
@@ -496,12 +504,15 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Objective:** Submission-ready project.
 **Depends on:** 18.
 
-- [ ] 19.1 **[M]** Final `README.md` (setup, seed, run, test, demo logins).
-- [ ] 19.2 **[M]** `docs/DEMO_SCRIPT.md` (the 11-step story with expected values).
-- [ ] 19.3 **[M]** Screenshots; architecture, database and API docs verified against the code.
-- [ ] 19.4 **[M]** `docs/VIVA_NOTES.md`: likely questions (why deterministic risk? why is AI not calculating? how is hallucination handled? why SQLite? limitations and honesty about heuristic weights).
-- [ ] 19.5 **[M]** Final report and presentation outline.
-- [ ] 19.6 **[M]** Definition of Done checklist run; tag `v1.0`.
+- [x] 19.1 **[M]** Final `README.md` (setup, seed, run, test, demo logins).
+- [x] 19.2 **[M]** `docs/DEMO_SCRIPT.md` (the 11-step story with expected values).
+- [x] 19.3 **[M]** Screenshots; architecture, database and API docs verified against the code.
+  > `docs/DOC_VERIFICATION.md`; PNGs in `docs/screenshots/`.
+- [x] 19.4 **[M]** `docs/VIVA_NOTES.md`: likely questions (why deterministic risk? why is AI not calculating? how is hallucination handled? why SQLite? limitations and honesty about heuristic weights).
+- [x] 19.5 **[M]** Final report and presentation outline.
+  > `docs/FINAL_REPORT.md`, `docs/PRESENTATION_OUTLINE.md`.
+- [x] 19.6 **[M]** Definition of Done checklist run; tag `v1.0`.
+  > Checklist: `docs/DEFINITION_OF_DONE.md`. Git tag `v1.0` not created (commit/tag only on request).
 
 **Exit criteria:** a fresh clone can be set up from the README and run the demo.
 

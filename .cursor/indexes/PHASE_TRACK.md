@@ -3,10 +3,10 @@
 Single tracker for completed phases and the current task. Update this file at the end of every task and every phase (see `.cursor/rules/project.mdc`).
 
 **Last updated:** 2026-09-19  
-**Current phase:** 13 Frontend foundation  
-**Current task:** 13.1 Vite + React + TypeScript + Tailwind + React Router scaffold  
-**Latest completed phase:** 12 Backend integration, hardening, freeze  
-**Latest completed task:** 12.10 Docs (tag `backend-v1` not created)  
+**Current phase:** 19 Final documentation & demo (complete)  
+**Current task:** none (all planned tasks done)  
+**Latest completed phase:** 19 Final documentation & demo  
+**Latest completed task:** 19.6 Definition of Done checklist  
 
 ## Status legend
 
@@ -29,13 +29,13 @@ Single tracker for completed phases and the current task. Update this file at th
 | 10 | AI assistant (chat) | [x] | 2026-09-19 | chat_v1 + history + fallback |
 | 11 | Interventions & teacher APIs | [x] | 2026-09-19 | 11.1–11.9; AI-4 included |
 | 12 | Backend integration, hardening, freeze | [x] | 2026-09-19 | overview, matrix, story, CSV, openapi.json |
-| 13 | Frontend foundation | [ ] | | |
-| 14 | Student pages (functional) | [ ] | | |
-| 15 | Teacher pages (functional) | [ ] | | |
-| 16 | Frontend integration & E2E, functional freeze | [ ] | | |
-| 17 | UI design | [ ] | | |
-| 18 | UI polish | [ ] | | |
-| 19 | Final documentation & demo | [ ] | | |
+| 13 | Frontend foundation | [x] | 2026-09-19 | Vite + React + TS + Tailwind; types from openapi.json |
+| 14 | Student pages (functional) | [x] | 2026-09-19 | Dashboard through profile; Recharts; mocked page tests |
+| 15 | Teacher pages (functional) | [x] | 2026-09-19 | Dashboard, list/filters, detail, interventions, analytics |
+| 16 | Frontend integration & E2E, functional freeze | [x] | 2026-09-19 | Demo checklist; as_of + forbidden fixes; no Playwright |
+| 17 | UI design | [x] | 2026-09-19 | UI_GUIDELINES + tokens + shared ui/*; D36 |
+| 18 | UI polish | [x] | 2026-09-19 | 18.1–18.5; D37; docs/UI_POLISH.md |
+| 19 | Final documentation & demo | [x] | 2026-09-19 | README, demo script, viva, report, screenshots |
 
 ## Phase 0 tasks
 
@@ -196,6 +196,88 @@ Single tracker for completed phases and the current task. Update this file at th
 | 12.8 Export openapi.json | [x] | 2026-09-19 |
 | 12.9 CSV import | [x] | 2026-09-19 |
 | 12.10 Docs (tag deferred) | [x] | 2026-09-19 |
+
+## Phase 13 tasks
+
+| Task | Status | Completed on |
+|---|---|---|
+| 13.1 Vite + React + TypeScript + Tailwind + React Router scaffold | [x] | 2026-09-19 |
+| 13.2 Generate TS types from openapi.json | [x] | 2026-09-19 |
+| 13.3 API client (token, 401, error shape) | [x] | 2026-09-19 |
+| 13.4 Auth context, login/register, guards | [x] | 2026-09-19 |
+| 13.5 Layout + role-based nav | [x] | 2026-09-19 |
+| 13.6 Shared components | [x] | 2026-09-19 |
+| 13.7 Vitest + RTL | [x] | 2026-09-19 |
+
+## Phase 14 tasks
+
+| Task | Status | Completed on |
+|---|---|---|
+| 14.1 Dashboard from `/students/me/overview` | [x] | 2026-09-19 |
+| 14.2 Risk page | [x] | 2026-09-19 |
+| 14.3 Performance page (Recharts) | [x] | 2026-09-19 |
+| 14.4 Subjects page | [x] | 2026-09-19 |
+| 14.5 What-If page | [x] | 2026-09-19 |
+| 14.6 AI Advisor page | [x] | 2026-09-19 |
+| 14.7 Study Planner page | [x] | 2026-09-19 |
+| 14.8 Interventions page | [x] | 2026-09-19 |
+| 14.9 Profile + study-habits | [x] | 2026-09-19 |
+| 14.10 Tests (What-If, Advisor, Planner) | [x] | 2026-09-19 |
+
+## Phase 15 tasks
+
+| Task | Status | Completed on |
+|---|---|---|
+| 15.1 Teacher dashboard | [x] | 2026-09-19 |
+| 15.2 Student list (filters, pagination, sort) | [x] | 2026-09-19 |
+| 15.3 Student detail | [x] | 2026-09-19 |
+| 15.4 Create intervention form | [x] | 2026-09-19 |
+| 15.5 Intervention tracking | [x] | 2026-09-19 |
+| 15.6 Subject analytics | [x] | 2026-09-19 |
+| 15.7 Tests (filters + intervention form) | [x] | 2026-09-19 |
+
+## Phase 16 tasks
+
+| Task | Status | Completed on |
+|---|---|---|
+| 16.1 Manual demo script against the real backend | [x] | 2026-09-19 |
+| 16.2 Fix defects; types if API changed | [x] | 2026-09-19 |
+| 16.3 AI-off fallbacks | [x] | 2026-09-19 |
+| 16.4 Playwright or manual checklist | [x] | 2026-09-19 |
+| 16.5 Functional freeze | [x] | 2026-09-19 |
+
+## Phase 17 tasks
+
+| Task | Status | Completed on |
+|---|---|---|
+| 17.1 Design direction + UI_GUIDELINES.md | [x] | 2026-09-19 |
+| 17.2 Tailwind theme | [x] | 2026-09-19 |
+| 17.3 Component library | [x] | 2026-09-19 |
+| 17.4 App shell and navigation | [x] | 2026-09-19 |
+| 17.5 Restyle student pages | [x] | 2026-09-19 |
+| 17.6 Restyle teacher pages | [x] | 2026-09-19 |
+| 17.7 Chart styling consistency | [x] | 2026-09-19 |
+
+## Phase 18 tasks
+
+| Task | Status | Completed on |
+|---|---|---|
+| 18.1 Responsive behaviour | [x] | 2026-09-19 |
+| 18.2 Loading / empty / error states | [x] | 2026-09-19 |
+| 18.3 Accessibility | [x] | 2026-09-19 |
+| 18.4 Micro-interactions | [x] | 2026-09-19 |
+| 18.5 Consistency audit | [x] | 2026-09-19 |
+
+## Phase 19 tasks
+
+| Task | Status | Completed on |
+|---|---|---|
+| 19.1 Final README.md | [x] | 2026-09-19 |
+| 19.2 docs/DEMO_SCRIPT.md | [x] | 2026-09-19 |
+| 19.3 Screenshots + doc verification | [x] | 2026-09-19 |
+| 19.4 docs/VIVA_NOTES.md | [x] | 2026-09-19 |
+| 19.5 Final report and presentation outline | [x] | 2026-09-19 |
+| 19.6 Definition of Done checklist | [x] | 2026-09-19 |
 
 ## How to update
 

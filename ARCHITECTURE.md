@@ -44,7 +44,9 @@ student-academic-advisor/
 ├── UI_GUIDELINES.md  CLAUDE_CONTEXT.md  README.md
 ├── .env.example  .gitignore  (CLAUDE.md optional pointer for Claude Code)
 ├── .cursor/rules/project.mdc
-├── docs/archive/            (original SRS/plan inputs)
+├── docs/                    DEMO_SCRIPT VIVA_NOTES FINAL_REPORT PRESENTATION_OUTLINE
+│                            DEFINITION_OF_DONE DOC_VERIFICATION FUNCTIONAL_DEMO UI_POLISH
+│                            screenshots/  archive/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py
@@ -68,7 +70,22 @@ student-academic-advisor/
 │   ├── tests/         unit/ api/ ai/ conftest.py
 │   ├── requirements.txt  requirements-dev.txt  pytest.ini
 └── frontend/          (created in Phase 13)
-    └── src/ api/ auth/ components/ pages/{student,teacher}/ hooks/ types/ routes/ lib/
+    ├── package.json  vite.config.ts  tailwind.config.js  .env.example
+    └── src/
+        ├── api/         client.ts auth.ts student.ts teacher.ts query.ts
+        ├── auth/        AuthContext.tsx token.ts ProtectedRoute.tsx RoleRoute.tsx
+        ├── components/  Layout Loading ErrorMessage EmptyState SimpleTable RiskBadge
+        │                RiskGauge FallbackBanner charts/TrendLineChart
+        │                ui/{Button,Card,Badge,Field,Input,Select,Textarea,Alert,
+        │                    Skeleton,Tabs,Modal,PageHeader}
+        ├── pages/       LoginPage RegisterPage ForbiddenPage PlaceholderPage
+        │                student/ Home Risk Performance Subjects WhatIf Advisor
+        │                Planner Interventions Profile
+        │                teacher/ Home Students Detail Interventions Subjects ClassSummary
+        ├── routes/      index.tsx
+        ├── types/       api.ts (generated from openapi.json)
+        ├── lib/         errors.ts useAsync.ts display.ts
+        └── test/        setup.ts render.tsx studentFixtures.ts teacherFixtures.ts
 ```
 
 ### 2.4 Responsibility matrix
@@ -142,3 +159,9 @@ student-academic-advisor/
 | D29 | 2026-09-19 | `GET /students/{id}/overview` is a composite of profile, compact risk, top factors, subject analysis, trend labels/slopes, warnings and open (PENDING/IN_PROGRESS) interventions. Risk persistence uses the existing snapshot rule. | Phase 12 dashboard contract; avoids a second risk formula. |
 | D30 | 2026-09-19 | CSV import is `POST /imports/attendance` and `POST /imports/assessments` (multipart `file`, `dry_run` default true). Parsing uses the stdlib `csv` module, not Pandas. Teacher write rules are applied per row; commit is all-or-nothing. | Completes deferred 4.9 without adding a dependency. Class analytics still uses Pandas (D21). |
 | D31 | 2026-09-19 | Teacher list/dashboard snapshot history is loaded in one query (`load_snapshots_bulk`). Seed story marks/attendance were steepened so Rahul’s live score is ≥ 80; `scripts/demo_advance.py` adds 4 recovery weeks so later risk lands about 50–70. | Phase 12.5/12.6: demo story and N+1 on `/teacher/students`. |
+| D32 | 2026-09-19 | Frontend is Vite + React 18 + TypeScript + Tailwind CSS 3 + React Router 6. Dev server proxies `/api` to `http://127.0.0.1:8000`; `VITE_API_BASE_URL` may be a full origin instead (backend CORS already allows `http://localhost:5173`). JWT is stored in `localStorage` key `saa_access_token` (accepted for a college demo). `src/types/api.ts` is generated with `openapi-typescript` from the committed `openapi.json`. | Phase 13 foundation; types must track the frozen API (D11). |
+| D33 | 2026-09-19 | Student performance charts are an SVG plot of backend `{on, value}` points plus backend labels/slopes (scale-to-view only). Auth context exposes the shared `ApiClient`. No frontend percentage, risk, or slope math. Recharts (named in Phase 14.3) was not imported so the tree stays install-free. | Agent environment had no npm on PATH; SVG meets the functional chart requirement without a new runtime dependency. |
+| D34 | 2026-09-19 | Teacher student list sorts the current page by backend `risk_score` only. The API has no sort query (frozen). | Phase 15.2 asked for sort-by-risk without an API change. |
+| D35 | 2026-09-19 | The frontend forwards optional `as_of` from the URL search param (layout date field) on API calls. The API already accepted the query; no OpenAPI change. Playwright was not added — the Phase 16 happy path is the manual checklist in `docs/FUNCTIONAL_DEMO.md`. | Phase 16: `demo_advance` writes dates after today; without `as_of` the UI cannot show improvement. |
+| D36 | 2026-09-19 | Phase 17 design system: academic paper/ink tokens in Tailwind, Source Serif 4 + Source Sans 3, shared `src/components/ui/*`. Risk colour is always paired with a marker and the printed level. SVG charts restyled; no new runtime dependency. | Completes UI_GUIDELINES.md deferred from 0.2; keeps D33 (no Recharts) and the functional freeze. |
+| D37 | 2026-09-19 | Phase 18 polish: mobile menu + skip link; `RiskGauge` maps the backend 0–100 score to a CSS bar width only; `SimpleTable` requires a caption; a11y is RTL + `docs/UI_POLISH.md` (no axe-core / Playwright / Lighthouse dependency). | Presentation-ready UI without expanding the frontend stack after the functional freeze. |

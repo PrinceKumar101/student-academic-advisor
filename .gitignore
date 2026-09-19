@@ -19,6 +19,7 @@ htmlcov/
 # Node
 node_modules/
 dist/
+.tools/
 
 # Environment (keep .env.example)
 .env
