@@ -1,0 +1,42 @@
+---
+description: Student Academic Advisor: permanent project rules
+alwaysApply: true
+---
+
+SOURCES OF TRUTH (read the relevant ones before every task)
+SRS.md, PROJECT_SPEC.md, ARCHITECTURE.md, DATABASE_SCHEMA.md, API_SPEC.md,
+AI_GUIDELINES.md, RISK_ENGINE_SPEC.md. Current status: CLAUDE_CONTEXT.md and DEVELOPMENT_PLAN.md.
+
+ARCHITECTURE RULES
+- Frontend and UI are built LAST (Phases 13+). Do not create frontend code before the Backend Freeze.
+- backend/app/engines/* are PURE: no FastAPI, no SQLAlchemy, no ai/, no datetime.now().
+  Pass `as_of: date` explicitly. Inputs and outputs are dataclasses.
+- Routers are thin: validate, authorize (api/deps.py), call one service, return a schema.
+- Authorization lives only in api/deps.py. Never return ORM objects; use response schemas.
+- Risk, trends and what-if NEVER call the AI. The app must work with the AI disabled.
+- Only services/ai_service.py (via ai/) talks to the AI provider. The API key exists only in backend env.
+- AI never computes numbers or writes academic facts. AI output is validated; failures use the fallback.
+- The frontend never computes percentages, risk or trends.
+- Do not add a dependency, framework, table or endpoint that is not in the docs without recording
+  it in ARCHITECTURE.md > Decision Log with a reason.
+
+WORKING RULES
+1. Inspect the repository and read the named docs BEFORE changing anything.
+2. Make the smallest change that meets the task. No unrelated refactoring or file edits.
+3. Never rewrite working code without a stated reason. Never delete functionality silently.
+4. Write tests for business logic and edge cases. Never call the real AI API in tests (use the fake client).
+5. Run the tests and linter. Fix failures. NEVER claim a test passed unless you ran it and saw it pass.
+   If something cannot be run, say so explicitly.
+6. Never hardcode or print secrets. .env is gitignored; .env.example has blanks.
+7. Update docs per this table:
+   DB change -> DATABASE_SCHEMA.md | API change -> API_SPEC.md | structure/dependency/decision -> ARCHITECTURE.md
+   AI behaviour -> AI_GUIDELINES.md | risk formula -> RISK_ENGINE_SPEC.md (+ bump config_version)
+   task done -> tick DEVELOPMENT_PLAN.md | phase done -> update CLAUDE_CONTEXT.md
+8. If the spec is ambiguous in a way that affects architecture, STOP and ask. Otherwise choose the
+   simplest option and record it.
+
+FINAL REPORT FORMAT (end every task with this)
+- Changed files: (list)
+- Tests run: (exact command + result summary)
+- Docs updated: (list or "none needed")
+- Deviations / open questions: (list or "none")
