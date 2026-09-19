@@ -1,7 +1,7 @@
 # DEVELOPMENT PLAN: Student Academic Advisor
 
 **Covers Outputs 6, 7, 9, 10** (roadmap, task breakdown, verification, state management).
-Design details live in `MASTER_DESIGN.md` (later split into `ARCHITECTURE.md`, `DATABASE_SCHEMA.md`, `API_SPEC.md`, `AI_GUIDELINES.md`, `RISK_ENGINE_SPEC.md`).
+Design details live in `ARCHITECTURE.md`, `DATABASE_SCHEMA.md`, `API_SPEC.md`, `AI_GUIDELINES.md` and `RISK_ENGINE_SPEC.md` (split from `docs/archive/MASTER_DESIGN.md` in task 0.2).
 
 **Core ordering rule: all frontend and UI work is in Stage 2 (Phases 13–19).** Stage 1 (Phases 0–12) is backend-only. It is verified with pytest, Swagger UI (`/docs`) and scripted demos, then frozen before any frontend code exists.
 
@@ -104,7 +104,8 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 
 - [x] 0.1 **[M]** Create the repo skeleton, `.gitignore`, `.env.example`, `project.mdc` (agent protocol), README stub, `git init`.
 - [x] 0.2 **[M]** Split `MASTER_DESIGN.md` into `PROJECT_SPEC.md`, `ARCHITECTURE.md` (with a Decision Log), `DATABASE_SCHEMA.md`, `API_SPEC.md`, `AI_GUIDELINES.md`, `RISK_ENGINE_SPEC.md`. Add `UI_GUIDELINES.md` stub ("deferred to Phase 17"). Place `DEVELOPMENT_PLAN.md` and `CLAUDE_CONTEXT.md`.
-- [ ] 0.3 **[M]** Consistency review: check that endpoints, tables and enums agree across all docs. List open questions.
+- [x] 0.3 **[M]** Consistency review: check that endpoints, tables and enums agree across all docs. List open questions.
+  > Report: `docs/CONSISTENCY_REVIEW.md`. Living-doc mismatches C1–C10 fixed; SRS-vs-design items left as intentional.
 
 **Tests:** none (documentation). **Docs:** all created.
 **Exit criteria:** every doc exists; the SRS and `MASTER_DESIGN.md` are in `docs/archive/`; open questions are empty or answered; first commit made.
@@ -118,12 +119,12 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 0.
 **Files:** `backend/app/main.py`, `core/config.py`, `core/errors.py`, `core/logging.py`, `tests/`.
 
-- [ ] 1.1 **[M]** Backend scaffold: venv, minimal `requirements.txt` (fastapi, uvicorn, pydantic-settings, python-multipart), `requirements-dev.txt` (pytest, pytest-cov, httpx, ruff), app factory, `/api/v1` router, `GET /health`, settings from `.env`.
-- [ ] 1.2 **[M]** Standard error handlers (format in `MASTER_DESIGN.md` §4.1, including 422 conversion), structured logging with a request-id middleware, CORS from config.
-- [ ] 1.3 **[M]** pytest config, `conftest.py` with a `client` fixture, tests for `/health`, error format and CORS. `ruff` config.
-- [ ] 1.4 **[S]** README run instructions (venv, install, run, test).
+- [x] 1.1 **[M]** Backend scaffold: venv, minimal `requirements.txt` (fastapi, uvicorn, pydantic-settings, python-multipart), `requirements-dev.txt` (pytest, pytest-cov, httpx, ruff), app factory, `/api/v1` router, `GET /api/v1/health`, settings from `.env`.
+- [x] 1.2 **[M]** Standard error handlers (format in `API_SPEC.md` §4.1, including 422 conversion), structured logging with a request-id middleware, CORS from config.
+- [x] 1.3 **[M]** pytest config, `conftest.py` with a `client` fixture, tests for `/api/v1/health`, error format and CORS. `ruff` config.
+- [x] 1.4 **[S]** README run instructions (venv, install, run, test).
 
-**Tests:** `/health` 200; unknown route gives the standard 404; invalid body gives the standard 422 shape; CORS header present for the allowed origin only.
+**Tests:** `/api/v1/health` 200; unknown route gives the standard 404; invalid body gives the standard 422 shape; CORS header present for the allowed origin only.
 **Exit criteria:** `uvicorn` starts; `/docs` loads; `pytest` green; error format verified.
 **Risks:** dependency creep. Add packages only when a phase needs them.
 
@@ -135,7 +136,7 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Depends on:** 1.
 **Files:** `db/`, `models/`, `core/security.py` (hash helpers only), `scripts/reset_db.py`, `scripts/seed_demo.py`.
 
-- [ ] 2.1 **[M]** SQLAlchemy setup (engine, session, `Base`, `get_db`), **SQLite FK pragma**, `enums.py`. Models: `User`, `Student`, `Teacher`. `core/security.py` with `hash_password` / `verify_password`.
+- [x] 2.1 **[M]** SQLAlchemy setup (engine, session, `Base`, `get_db`), **SQLite FK pragma**, `enums.py`. Models: `User`, `Student`, `Teacher`. `core/security.py` with `hash_password` / `verify_password`.
 - [ ] 2.2 **[M]** Models: `Subject`, `Enrollment`, `TeachingAssignment`, `AttendanceRecord`, `Assessment` (with CHECK constraints), `SemesterResult`, `StudyHabit`.
 - [ ] 2.3 **[M]** Model: `RiskAssessment` (JSON columns). Indexes review. `reset_db.py` (drop, create).
 - [ ] 2.4 **[M]** Seed generator core: RNG, profile parameters (six profiles), name list, subject and teacher setup, enrollments, teaching assignments.
@@ -143,7 +144,7 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 - [ ] 2.6 **[M]** Story and edge students (`rahul`, `newstudent`, `zeroclass`, `missingassign`) and `seed_demo.py` CLI with `--as-of`.
 - [ ] 2.7 **[M]** Database tests: constraints, FK enforcement, uniqueness, cascade rules, seed counts and determinism.
 
-**Tests:** CHECK violations (`attended > held`, `GRADED` without marks); duplicate `(student, subject)` enrollment rejected; FK enforcement proven (insert with a bad FK fails); seed twice gives identical data; counts match §9 of the design.
+**Tests:** CHECK violations (`attended > held`, `GRADED` without marks); duplicate `(student, subject)` enrollment rejected; FK enforcement proven (insert with a bad FK fails); seed twice gives identical data; counts match `DATABASE_SCHEMA.md` §3.5.
 **Docs:** `DATABASE_SCHEMA.md` (final columns).
 **Exit criteria:** `reset_db` + `seed_demo` runs in seconds; 43 students, 5 subjects, 2 teachers present; all DB tests green.
 **Risks:** seed realism (tuned in 5.10 and 12.5); forgetting the FK pragma.
@@ -178,7 +179,7 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 **Files:** `api/routers/{students,subjects,attendance,assessments}.py`, `services/academic_data_loader.py`, `schemas/`.
 
 - [ ] 4.1 **[M]** Subjects CRUD + enrollment endpoints.
-- [ ] 4.2 **[M]** `GET /students/{id}`, study-habits GET/PUT (student own only), semester-results GET/PUT (teacher).
+- [ ] 4.2 **[M]** `GET /students/{id}`, study-habits GET (S,T) / PUT (S only), semester-results GET (S,T) / PUT (teacher).
 - [ ] 4.3 **[M]** Attendance endpoints with the computed % summary per subject (guards zero classes).
 - [ ] 4.4 **[M]** Assessment endpoints (types, status rules, marks bounds).
 - [ ] 4.5 **[M]** Teacher write-permission rule (only taught subjects and sections) shared by 4.1, 4.3 and 4.4.
@@ -508,7 +509,7 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 | Phase | Key acceptance test | Exit evidence |
 |---|---|---|
 | 0 | Docs consistent | All docs present, open questions closed |
-| 1 | `/health`, error format | pytest green, `/docs` loads |
+| 1 | `/api/v1/health`, error format | pytest green, `/docs` loads |
 | 2 | Constraints and FK enforced; seed deterministic | DB tests green, 43 students seeded |
 | 3 | Login, expiry, tamper, cross-student 403 | Auth tests green |
 | 4 | CRUD and permissions; loader correct | API tests green, no N+1 |
@@ -553,7 +554,7 @@ Missing data · invalid values · empty datasets · zero classes held · no asse
 
 ### 4.4 Decision log
 
-Any deviation from `MASTER_DESIGN.md` (new dependency, changed table, changed weight) is recorded in the Decision Log section of `ARCHITECTURE.md` with the date, the reason and the affected docs.
+Any deviation from the living design docs (new dependency, changed table, changed weight) is recorded in the Decision Log section of `ARCHITECTURE.md` with the date, the reason and the affected docs.
 
 ---
 

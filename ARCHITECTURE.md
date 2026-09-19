@@ -48,11 +48,11 @@ student-academic-advisor/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py
-│   │   ├── core/      config.py security.py errors.py logging.py
+│   │   ├── core/      config.py security.py errors.py logging.py exception_handlers.py
 │   │   ├── db/        base.py session.py
 │   │   ├── models/    one file per entity + enums.py
 │   │   ├── schemas/   Pydantic request/response models
-│   │   ├── api/       deps.py  routers/{auth,students,subjects,attendance,
+│   │   ├── api/       deps.py  routers/{health,auth,students,subjects,attendance,
 │   │   │              assessments,risk,trends,analytics,ai,study_plans,
 │   │   │              interventions,teacher}.py
 │   │   ├── services/  academic_data_loader.py risk_service.py trend_service.py
@@ -90,7 +90,7 @@ student-academic-advisor/
 ### 2.5 Key data flows
 
 **Student dashboard (Phase 12 composite endpoint)**
-`GET /students/me/overview` → `authorize_student_access` → `load_academic_data` (bulk) → risk engine + trend engine + subject analysis + warnings → JSON (persist snapshot if changed) → frontend renders.
+`GET /students/{id}/overview` (`{id}` may be `me`) → `authorize_student_access` → `load_academic_data` (bulk) → risk engine + trend engine + subject analysis + warnings → JSON (persist snapshot if changed) → frontend renders.
 
 **AI analysis**
 `POST /ai/analysis` → authorize → compute facts (engines) → `context_builder` → hash → cache hit? return. Otherwise check daily limit → AI client (timeout, ≤1 retry) → validate schema and grounding → store → return `{facts, advice, source}`. On any AI failure, use the deterministic fallback with `source: FALLBACK`.
@@ -120,3 +120,6 @@ student-academic-advisor/
 | D11 | 2026-09-19 | New doc `RISK_ENGINE_SPEC.md`. TypeScript API types are generated from the exported OpenAPI (Phase 13). | Risk formulas need a dedicated spec; frontend types must match the frozen API. |
 | D12 | 2026-09-19 | Deferred: notifications, email, PDF export, reporting module, Docker, Alembic. CI is optional. | Low demo value relative to cost; reporting and notifications had no endpoints. |
 | D13 | 2026-09-19 | Risk snapshots persisted as a side effect of computing risk. No background jobs, no cache invalidation. | Keeps scoring request-driven and testable; avoids a job runner for a college project. |
+| D14 | 2026-09-19 | Escalation reason is per floor that fired (attendance and/or internal). Both reasons are stored when both fire. | `RISK_ENGINE_SPEC` named two floors but only one example string. |
+| D15 | 2026-09-19 | Errors live in `core/errors.py` + `core/exception_handlers.py`; request tracing lives in `core/logging.py` (`RequestIdMiddleware`). All HTTP failures use the `API_SPEC.md` `{error:{code,message,details}}` envelope. | Phase 1 needs one error shape and a request id without adding auth or a logging framework. |
+| D16 | 2026-09-19 | Password hashing uses `pwdlib[argon2]` via `PasswordHash.recommended()` in `core/security.py` (`hash_password` / `verify_password` only). JWT is still deferred to Phase 3. | D10 allowed pwdlib[argon2] or bcrypt; Argon2 is the current recommended hasher and avoids passlib. |
