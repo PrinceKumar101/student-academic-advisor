@@ -64,12 +64,31 @@ Named in `frontend/tailwind.config.js` and applied in `frontend/src/index.css`.
 
 **Typography**
 
-- Headings: Source Serif 4 (fallback Georgia / `ui-serif`)
-- Body / UI: Source Sans 3 (fallback system-ui)
+- Headings: Source Serif 4 600 (fallback Georgia / `ui-serif`)
+- Body / UI: Source Sans 3 400 / 500 / 600 (fallback system-ui)
 - Page title: `text-3xl` serif
 - Section: `text-lg` serif
 - Body: `text-sm` / `text-base`
 - Tabular numbers for scores
+
+### Landing token layer (UI-02, D39)
+
+The public landing page uses a **second, additive** token layer. It never redefines
+the tokens above, so changing it cannot move the dashboards.
+
+- Values: `--landing-*` custom properties on `:root` in `frontend/src/index.css`.
+- Tailwind namespace: `landing-*` (`bg-landing-canvas`, `text-landing-ink-muted`,
+  `shadow-landing-panel`, `rounded-landing-md`, `duration-landing-fast`, `ease-landing`).
+- Surfaces: `paper` → `canvas` → `surface` → `raised`. Rules: `rule-faint` → `rule` → `rule-strong`.
+- Ink: `ink` (headings) → `ink-body` (copy) → `ink-muted` (labels). Accent adds `accent-hover`,
+  `accent-soft` and `accent-ink` (text on accent).
+- Type scale: `.saa-display`, `.saa-headline`, `.saa-subhead`, `.saa-lede`, `.saa-eyebrow`,
+  `.saa-label`, `.saa-metric`. The last three use system monospace.
+- Landing heading weights (serif 700) are scoped under `.saa-landing` on the landing root.
+  Do not apply that class outside the landing page.
+- Motion: `.saa-landing-enter` on load (stagger with `--saa-enter-delay`), `.saa-reveal` on
+  scroll, `.saa-landing-draw` for SVG paths. All three resolve instantly under
+  `prefers-reduced-motion: reduce`.
 
 **Spacing:** 8 px grid (`2`, `4`, `6`, `8`). Page max width `7xl`. Card padding `p-5`.
 

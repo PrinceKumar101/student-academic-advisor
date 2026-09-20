@@ -78,13 +78,17 @@ student-academic-advisor/
         │                RiskGauge FallbackBanner charts/TrendLineChart
         │                ui/{Button,Card,Badge,Field,Input,Select,Textarea,Alert,
         │                    Skeleton,Tabs,Modal,PageHeader}
-        ├── pages/       LoginPage RegisterPage ForbiddenPage PlaceholderPage
+        │                landing/ Section Reveal LandingNav HeroSection TrustStrip
+        │                         ProductPreview FeatureGrid HowItWorks
+        │                         ExplainabilitySection CtaBand LandingFooter
+        ├── pages/       LandingPage LoginPage RegisterPage ForbiddenPage PlaceholderPage
         │                student/ Home Risk Performance Subjects WhatIf Advisor
         │                Planner Interventions Profile
         │                teacher/ Home Students Detail Interventions Subjects ClassSummary
         ├── routes/      index.tsx
         ├── types/       api.ts (generated from openapi.json)
-        ├── lib/         errors.ts useAsync.ts display.ts
+        ├── lib/         errors.ts useAsync.ts display.ts cx.ts
+        │                useInView.ts usePrefersReducedMotion.ts
         └── test/        setup.ts render.tsx studentFixtures.ts teacherFixtures.ts
 ```
 
@@ -165,3 +169,6 @@ student-academic-advisor/
 | D35 | 2026-09-19 | The frontend forwards optional `as_of` from the URL search param (layout date field) on API calls. The API already accepted the query; no OpenAPI change. Playwright was not added — the Phase 16 happy path is the manual checklist in `docs/FUNCTIONAL_DEMO.md`. | Phase 16: `demo_advance` writes dates after today; without `as_of` the UI cannot show improvement. |
 | D36 | 2026-09-19 | Phase 17 design system: academic paper/ink tokens in Tailwind, Source Serif 4 + Source Sans 3, shared `src/components/ui/*`. Risk colour is always paired with a marker and the printed level. SVG charts restyled; no new runtime dependency. | Completes UI_GUIDELINES.md deferred from 0.2; keeps D33 (no Recharts) and the functional freeze. |
 | D37 | 2026-09-19 | Phase 18 polish: mobile menu + skip link; `RiskGauge` maps the backend 0–100 score to a CSS bar width only; `SimpleTable` requires a caption; a11y is RTL + `docs/UI_POLISH.md` (no axe-core / Playwright / Lighthouse dependency). | Presentation-ready UI without expanding the frontend stack after the functional freeze. |
+| D38 | 2026-09-19 | UI-01 landing foundation: `/` renders the new public `LandingPage`; `HomeRedirect` is kept and moved to `/home`, which becomes the canonical "take me to my dashboard" URL so landing CTAs do not duplicate role logic. Landing UI lives in `frontend/src/components/landing/`; `useInView` and `usePrefersReducedMotion` join `src/lib/`. The catch-all `*` still points at `/`, so unknown URLs now land on the public page instead of the role redirect. No new runtime dependency. | `docs/UI_REDESIGN_PLAN.md` UI-01 needs a public `/` without deleting the existing role redirect or adding authentication logic. |
+| D39 | 2026-09-19 | UI-02 landing design foundation: landing visual tokens are a second, additive layer (`--landing-*` custom properties in `src/index.css`, exposed to Tailwind as the `landing-*` colour/shadow/radius/duration namespace). No Phase 17 token was redefined, and landing heading weights are scoped under a `.saa-landing` class so dashboards keep serif 600. Source Sans 3 500 and Source Serif 4 700 were added to the shared Google Fonts request; 500 is a global change because the font link is global. No new runtime dependency. | `docs/UI_REDESIGN_PLAN.md` UI-02 asks for a landing visual language without restyling existing pages. Weight 500 was already requested by `font-medium` across the app and was silently falling back to 400. |
+| D40 | 2026-09-19 | UI-03 navigation and hero: the landing header is `fixed` and condenses onto its own surface past 8 px of scroll. `LandingNav` and `HeroSection` both read the existing auth context through one small hook, `components/landing/useLandingCta.ts`, so a signed-in visitor sees a single "Go to your dashboard" action routed by role (`/teacher` or `/student`) instead of Get started / Log in. No authentication logic was added and the landing page still issues no request of its own. The hero product panel renders static `heroDemoData.ts` values taken from the risk engine's own worked R3 case (`RISK_ENGINE_SPEC.md` 6.8), reusing `RiskGauge` and `RiskBadge` unchanged. `Section` gained an optional `backdrop` slot for full-bleed decorative layers. No new runtime dependency. | `docs/UI_REDESIGN_PLAN.md` UI-03 requires a role-aware CTA and a product visualisation that makes zero API calls. Reusing engine test-case numbers keeps the public page honest: nothing on it is invented. |

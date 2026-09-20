@@ -22,6 +22,31 @@ function authFetch(me = studentMe()) {
   });
 }
 
+describe("landing route", () => {
+  it("renders the landing page at / without calling the API", async () => {
+    const fetchImpl = vi.fn();
+    renderApp(<AppRoutes />, { route: "/", fetchImpl });
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: /slipping/i }),
+    ).toBeInTheDocument();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("sends a signed-in student from /home to the dashboard", async () => {
+    const store = createMemoryStore({ [ACCESS_TOKEN_KEY]: "test-token" });
+    renderApp(<AppRoutes />, { route: "/home", store, fetchImpl: authFetch() });
+
+    expect(await screen.findByRole("heading", { name: "Student dashboard" })).toBeInTheDocument();
+  });
+
+  it("sends a signed-out visitor from /home to login", async () => {
+    renderApp(<AppRoutes />, { route: "/home", fetchImpl: authFetch() });
+
+    expect(await screen.findByRole("heading", { name: "Log in" })).toBeInTheDocument();
+  });
+});
+
 describe("auth routes", () => {
   it("stores the token on login and lands on the student home", async () => {
     const user = userEvent.setup();

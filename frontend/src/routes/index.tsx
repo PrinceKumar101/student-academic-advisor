@@ -4,6 +4,7 @@ import { ProtectedRoute } from "../auth/ProtectedRoute";
 import { HomeRedirect, RoleRoute } from "../auth/RoleRoute";
 import { Layout } from "../components/Layout";
 import { ForbiddenPage } from "../pages/ForbiddenPage";
+import { LandingPage } from "../pages/LandingPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { AdvisorPage } from "../pages/student/AdvisorPage";
@@ -27,7 +28,8 @@ export function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forbidden" element={<ForbiddenPage />} />
-      <Route path="/" element={<HomeRedirect />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/home" element={<HomeRedirect />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
