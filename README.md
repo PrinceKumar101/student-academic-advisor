@@ -45,7 +45,7 @@ npm install
 npm run dev                       # http://127.0.0.1:5173
 ```
 
-Then open http://127.0.0.1:5173 and log in with a demo account below.
+Then open http://127.0.0.1:5173. `/` is the public landing page (static example data, no API calls); use **Log in** there, or go to `/login`, with a demo account below. `/home` sends a signed-in user to their role's dashboard.
 
 - Health: http://127.0.0.1:8000/api/v1/health → `{"status":"ok"}`
 - Swagger: http://127.0.0.1:8000/docs (Authorize with email as `username`)
@@ -160,7 +160,8 @@ Engines (`risk`, `trend`, `whatif`, `time_budget`, …) import no FastAPI, SQLAl
 | `docs/DEFINITION_OF_DONE.md` | Final DoD run |
 | `docs/DOC_VERIFICATION.md` | Docs vs code check |
 | `docs/FUNCTIONAL_DEMO.md` | Phase 16 browser checklist |
-| `docs/UI_POLISH.md` | Phase 18 a11y / polish notes |
+| `docs/UI_POLISH.md` | Phase 18 a11y / polish notes; landing redesign log |
+| `docs/UI_REDESIGN_PLAN.md` | Landing-page redesign plan and final design |
 | `docs/screenshots/` | Demo captures |
 | `.cursor/indexes/PHASE_TRACK.md` | Phase/task tracker |
 

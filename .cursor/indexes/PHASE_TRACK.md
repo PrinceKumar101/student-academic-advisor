@@ -2,11 +2,11 @@
 
 Single tracker for completed phases and the current task. Update this file at the end of every task and every phase (see `.cursor/rules/project.mdc`).
 
-**Last updated:** 2026-09-19  
-**Current phase:** UI-redesign — next is UI-07 Motion, Accessibility & Performance  
-**Current task:** none (UI-06 complete; start UI-07 in a new chat)  
-**Latest completed phase:** UI-06 Responsive Design  
-**Latest completed task:** UI-06 validation (typecheck + 55 Vitest tests + build + browser audit at 320/375/768/1024/1440, mobile menu, touch targets, hover-only scan, console and zero-request check)  
+**Last updated:** 2026-09-22  
+**Current phase:** none — UI redesign complete (UI-01 to UI-08)  
+**Current task:** none  
+**Latest completed phase:** UI-08 Final QA & Documentation  
+**Latest completed task:** UI-08 final QA (60 frontend + 189 backend tests, typecheck, build, live route/role check against the real backend, diff audit since `bba285f`, docs)  
 
 ## Status legend
 
@@ -903,66 +903,289 @@ column, h1 at 40 px over four lines.
 
 ## UI-07 — Motion, Accessibility & Performance
 
-Status: [ ]
+Status: [x]
 
-- [ ] Entrance animations refined
-- [ ] Hero data animation refined
-- [ ] Ambient motion implemented/refined
-- [ ] Hover interactions refined
-- [ ] Reduced-motion behavior verified
-- [ ] Keyboard traversal verified
-- [ ] Focus states verified
-- [ ] Contrast verified
-- [ ] Screen-reader semantics verified
-- [ ] Console checked
-- [ ] Performance checked
-- [ ] Landing page makes zero API requests
-- [ ] Phase documented
+Completed on: 2026-09-22
+
+- [x] Entrance animations refined
+- [x] Hero data animation refined
+- [x] Ambient motion implemented/refined
+- [x] Hover interactions refined
+- [x] Reduced-motion behavior verified
+- [x] Keyboard traversal verified
+- [x] Focus states verified
+- [x] Contrast verified
+- [x] Screen-reader semantics verified
+- [x] Console checked
+- [x] Performance checked
+- [x] Landing page makes zero API requests
+- [x] Phase documented
+
+### Implemented
+
+**Most of the motion layer was already in the working tree when this phase
+opened**, written by an earlier session that stopped before recording anything —
+the same pattern noted under UI-03. `index.css` already carried
+`.saa-landing-sweep`, `.saa-landing-fade`, the `.saa-hero-panel .saa-gauge-fill`
+rule and both ambient loops; `actionStyles.ts`, `motion.ts`, `HeroBackdrop.tsx`
+and `HeroAdvisorPanel.tsx` already used them, and the suite was at 59 tests
+(UI-06 recorded 55) because a "LandingPage motion" block of four cases existed.
+This phase audited that work against the UI-07 checklist, fixed the one defect
+it found, and ran the verification the checklist asks for.
+
+**The one defect: the navigation condense animated `all`.** The header's inner
+container carried `transition-all duration-landing`, so the only property that
+actually changes there — `padding`, a layout property — eased for 420 ms on every
+scroll past 8 px, and it did so under `prefers-reduced-motion: reduce` as well,
+because nothing in the reduced-motion blocks reaches a Tailwind transition
+utility. Measured in the browser under emulated reduced motion it reported
+`transition-property: all` at `0.42s`. It is now
+`transition-[padding] … motion-reduce:transition-none`, which names the property
+instead of letting `all` pick up anything added later, and snaps instead of
+easing when reduced motion is set. The condense itself is unchanged: transparent
+→ `landing-paper/90` with `blur(4px)`, the hairline rule, and 16 px → 10 px of
+padding.
+
+Nothing else was changed. Reviewed and kept as correct:
+
+- **Entrance and stagger.** Five `.saa-landing-enter` steps at 0 / 80 / 160 / 240
+  / 320 ms, all 420 ms except the panel at 560 ms, on the landing easing.
+- **Hero data.** Gauge sweep at 480 ms, attendance draw at 600 ms over 720 ms,
+  the three factor bars at 720 / 770 / 820 ms, the AI explanation at 940 ms and
+  the end-point dot at 1200 ms as the stroke reaches it. The bars and the gauge
+  sweep with `scaleX` from a left origin, so the real width stays the inline one
+  and nothing reflows while they draw.
+- **Ambient.** Two loops, both on the decorative `aria-hidden` backdrop and both
+  compositor-only: the engraved grid drifts exactly one 32 px cell over 60 s
+  linear (so the restart is invisible), and the light pool breathes between
+  opacity 1 and 0.86 at scale 1 to 1.025 over 52 s. Within the 45–60 s band the
+  plan asks for. No parallax, no cursor follower, no gradient mesh, no typewriter.
+- **Hover.** Colour change plus a one-pixel lift, the lift gated on
+  `motion-safe`, and the transition names
+  `background-color, border-color, color, transform` rather than `all`.
+
+### Validation
+
+- `npm run typecheck` — passed.
+- `npm test` — 20 files, **60 tests** passed (59 before): one new case in the
+  "LandingPage motion" block asserts the navigation bar names `transition-[padding]`,
+  carries `motion-reduce:transition-none` and no longer carries `transition-all`.
+- `npm run build` — passed; `transition-property:padding` and both ambient
+  keyframes are present in `dist/assets/*.css`.
+- Browser, Chrome via CDP against a freshly started `npm run dev`, with a
+  `console.error` / `console.warn` / `error` / `unhandledrejection` collector and
+  `layout-shift` / `longtask` PerformanceObservers installed via
+  `Page.addScriptToEvaluateOnNewDocument` **before** the document loads:
+  - **Motion timeline**, read from computed styles, matches the intended
+    sequence exactly (the delays and durations listed above, all on
+    `cubic-bezier(0.22, 0.61, 0.36, 1)` except the linear grid drift). Once the
+    entrance finishes, `document.getAnimations()` reports exactly **2** running
+    animations — the two ambient loops — out of 14 total.
+  - **Reduced motion** (`Emulation.setEmulatedMedia`), on a fresh load: every
+    `.saa-landing-enter`, `.saa-landing-draw`, `.saa-landing-sweep`,
+    `.saa-landing-fade` and the hero gauge fill reports `animation-name: none`,
+    opacity 1, no transform, `stroke-dasharray: none` and
+    `stroke-dashoffset: 0`; both ambient loops report `animation-name: none`, so
+    they never start rather than starting and freezing; all **10** `.saa-reveal`
+    nodes are at opacity 1 with no `.saa-reveal-pending`; the navigation bar
+    reports `transition-property: none`; and `getAnimations()` reports **0**
+    running animations for the whole page.
+  - **Keyboard traversal** at 1440 px: 18 tabbable elements in visual order
+    (skip link, wordmark, three section anchors, the auth pair, the two hero
+    CTAs, the two closing CTAs, then the footer). The mobile toggle is correctly
+    **out** of the tab order at desktop, the always-mounted mobile menu's links
+    are out of it behind `hidden`, no element inside an `aria-hidden` subtree is
+    focusable, and there is no positive `tabindex`. Every target is 44 px tall.
+  - **Focus states**, forced with `CSS.forcePseudoState` because `:focus-visible`
+    does not match in a background automation tab: the global ring resolves to
+    `0 0 0 2px paper, 0 0 0 4px accent`, and the skip link goes from its 1 × 1
+    `sr-only` box to **170 × 44 at (16, 16)** on `landing-surface`. No ancestor
+    clips the ring (the only non-visible overflow on the path is
+    `overflow-x: clip` with `overflow-y: visible`).
+  - **Mobile menu at 375 px**, live rather than by test: the toggle opens the
+    menu, Escape closes it, `aria-expanded` returns to `"false"`,
+    `document.activeElement` is the toggle again, and there is no overflow.
+  - **Contrast**, computed for every text node in `header`, `main` and `footer`
+    against its nearest opaque background: **zero failures**. The two closest are
+    the AI card's muted labels on `accent-soft` at **4.75** against the 4.5 that
+    normal text needs.
+  - **Screen-reader semantics**: exactly one `h1`; sections use `aria-labelledby`
+    pointing at their own heading; both figures carry their own `figcaption` and
+    `aria-labelledby`; the sparkline is `role="img"` with an `aria-label` naming
+    the range and the 75% cutoff; the weight ruler, the preview's navigation
+    rail, the factor bars and the whole hero backdrop are `aria-hidden` with the
+    same figures available as text.
+  - **Hover audit**: every `:hover` rule in the loaded stylesheets touching
+    `display`, `visibility`, `opacity`, `transform` or `content` was enumerated —
+    **nothing is revealed on hover**, so no content needs a mouse.
+  - **Performance**: **CLS 0.0000** on load and **0.0001** across a full
+    scroll-through of the 7.6k px document, **zero** long tasks, 90 resources
+    with no failures, and no Vite error overlay.
+  - **Console**: empty on load and across the scroll-through — no errors, no
+    warnings, no uncaught exceptions, no unhandled rejections. (One
+    `SyntaxError` appeared in an earlier run and was traced to the collector
+    script being registered twice by the harness, not to the app; re-run with a
+    single registration, the console is clean.)
+  - **Zero API requests**: no resource reaches `localhost:8000` on load, across
+    the scroll-through, or after a `/` → `/login` → back round trip. The only
+    non-Vite entries are the Google Fonts stylesheet and two woff2 files.
+  - **Scroll reveals**: scrolling the document in 400 px steps brings all 10
+    `.saa-reveal` nodes to opacity 1.
+  - **Route check**: `/login` still renders its own `h1` and form, with
+    `.saa-landing` absent, and going back restores the landing page with its
+    `h1`, both figures, all 10 reveals and both ambient loops.
+- `git status` — only `frontend/src/components/landing/LandingNav.tsx` and
+  `frontend/src/pages/LandingPage.test.tsx` are modified. `backend/`,
+  `frontend/src/api/`, `frontend/src/auth/`, `frontend/src/types/`,
+  `frontend/src/pages/student/`, `frontend/src/pages/teacher/` and
+  `openapi.json` are clean.
+
+### Known issues / blockers
+
+- The UI-06 note about the stacked sparkline stands: at 448 px the 264-unit
+  `viewBox` is still stretched about 1.5× by `preserveAspectRatio="none"`, so the
+  −4.4 pts/week decline reads shallower on the landing page than the same data
+  does on the risk page. Left alone deliberately — the alternatives are measuring
+  the rendered width and rebuilding the points, or dropping the
+  `pathLength`-normalised draw-on, and neither is worth it for a decorative
+  example panel.
+- Screenshots through the automation tab are capped near 1024 px wide regardless
+  of `Emulation.setDeviceMetricsOverride`, so the wide-viewport captures are
+  cropped. Every desktop claim above is a measurement, not a screenshot reading;
+  the layout evidence at each width is UI-06's table.
+- Signed-in motion and CTA states are still covered by automated tests only. The
+  live check remains blocked by the UI-03 issue where the sandboxed dev server
+  cannot reach the backend through the `/api` proxy.
+- The landing page loads Google Fonts from the network with `display=swap`. It is
+  the only third-party request and predates this phase, but it is the one thing
+  on the page that could shift text if the network is slow; measured CLS was 0
+  here because the fonts were cached.
 
 ---
 
 ## UI-08 — Final QA & Documentation
 
-Status: [ ]
+Status: [x]
 
-- [ ] Full test suite passes
-- [ ] Typecheck passes
-- [ ] Production build passes
-- [ ] All relevant routes verified
-- [ ] Git diff audited
-- [ ] Backend unchanged
-- [ ] API unchanged
-- [ ] Business logic unchanged
-- [ ] Risk engine unchanged
-- [ ] Authentication mechanics unchanged
-- [ ] UI_REDESIGN_PLAN.md updated
-- [ ] UI_POLISH.md updated
-- [ ] UI_GUIDELINES.md updated if required
-- [ ] ARCHITECTURE.md updated if required
-- [ ] README.md updated if required
-- [ ] Final screenshots/visual verification completed
-- [ ] Final UI redesign marked complete
+Completed on: 2026-09-22
+
+- [x] Full test suite passes
+- [x] Typecheck passes
+- [x] Production build passes
+- [x] All relevant routes verified
+- [x] Git diff audited
+- [x] Backend unchanged
+- [x] API unchanged
+- [x] Business logic unchanged
+- [x] Risk engine unchanged
+- [x] Authentication mechanics unchanged
+- [x] UI_REDESIGN_PLAN.md updated
+- [x] UI_POLISH.md updated
+- [x] UI_GUIDELINES.md updated if required
+- [x] ARCHITECTURE.md updated if required
+- [x] README.md updated if required
+- [x] Final screenshots/visual verification completed
+- [x] Final UI redesign marked complete
+
+### Implemented
+
+No application code changed in this phase. Documentation only:
+
+- `docs/UI_REDESIGN_PLAN.md` — new "Final approved design" section: visual
+  identity, token table, typography, motion system with the real timings,
+  section order, hero specification, component architecture, responsive
+  strategy, accessibility and performance requirements.
+- `docs/UI_POLISH.md` — appended a chronological UI-01 to UI-08 log (date,
+  changes, validation, known issues) plus the UI-08 observations. Phase 18
+  history kept.
+- `UI_GUIDELINES.md` — the landing motion list named only the UI-02 classes;
+  added `.saa-landing-sweep`, `.saa-landing-fade`, the two ambient loops,
+  `enterDelay()`, the shared `actionStyles.ts` actions and the static-data rule.
+- `ARCHITECTURE.md` — the `components/landing/` tree was missing
+  `HeroBackdrop`, `HeroAdvisorPanel`, `useLandingCta`, `actionStyles`, `motion`
+  and both data files. No new Decision Log entry: UI-04 to UI-08 introduced no
+  architectural decision beyond D38–D40.
+- `README.md` — the quick start said "open the app and log in", which is no
+  longer what `/` does; it now says `/` is the public landing page and names
+  `/home`. Added `docs/UI_REDESIGN_PLAN.md` to the document table.
+- `CLAUDE_CONTEXT.md` — phase, decisions D38–D40, known issue, recent change.
+
+### Validation
+
+- `npm run typecheck` — passed.
+- `npm test` — 20 files, **60 tests** passed.
+- `npm run build` — passed (CSS 31.47 kB / 6.80 kB gzip, JS 260.65 kB / 78.24 kB gzip).
+- Backend, as a regression check: `pytest -q` — **189 passed**; `ruff check .` — all checks passed.
+- **Diff audit** against `bba285f` (the last commit before the redesign):
+  `git diff --stat bba285f -- backend openapi.json frontend/src/api frontend/src/auth frontend/src/types frontend/src/pages/student frontend/src/pages/teacher`
+  is **empty**. No shared component outside `components/landing/` changed.
+  Outside the landing folder the redesign touched only `routes/index.tsx` (`/` →
+  `LandingPage`, `HomeRedirect` → `/home`), `index.html` (font weights),
+  `tailwind.config.js` and `index.css` (additive only: the diff has no removed
+  lines), the two `lib/` hooks, tests and docs.
+- **Live browser check** with the real backend. For the first time in this track,
+  the dev server was started outside the sandbox, so the `/api` proxy reached
+  uvicorn (`/api/v1/health` → ok):
+  - Signed out: `/` renders one h1 and no horizontal overflow, and makes zero
+    `/api/v1` requests. The only external request is Google Fonts. The mobile
+    menu opens, and its "Log in" routes to `/login`. `/register` renders the
+    student form (not submitted, to keep the seed intact).
+  - Student (`rahul@demo.edu`): all nine `/student/*` routes render their own
+    h1 with no error alert. The dashboard shows 84.1 HIGH, matching the README
+    story. `/home` → `/student`. On `/`, every auth CTA collapses to "Go to your
+    dashboard" → `/student`.
+  - Logout clears `saa_access_token` and lands on `/login`. Signed out,
+    `/student` and `/home` both redirect to `/login`.
+  - Teacher (`teacher1@demo.edu`): `/teacher`, `/teacher/students`,
+    `/teacher/students/3`, `/teacher/interventions` and `/teacher/subjects` all
+    render. `/student` → `/forbidden`. `/home` → `/teacher`. Landing CTAs →
+    `/teacher`.
+  - 53 `/api/v1` calls across both roles, **all 2xx**, no failed requests.
+  - Scroll-through: all 10 `.saa-reveal` nodes reach opacity 1. Exactly 2
+    running animations afterwards (the ambient loops). CLS 0.
+- Screenshots were taken of the hero, the open mobile menu, the product preview,
+  explainability and the live student dashboard. As recorded in UI-07, the
+  automation tab renders about 512 CSS px wide, so these show the stacked layout.
+  Desktop layout evidence is UI-06's measured table.
+
+### Known issues / blockers
+
+- **Console, pre-existing, outside scope:** a React dev warning, "Encountered
+  two children with the same key", comes from
+  `components/charts/TrendLineChart.tsx` (Phase 17, untouched by the redesign).
+  Its point key `${on}-${value}` repeats when a series has two equal points on
+  one date. It fires on `/student/performance` and the teacher student-detail
+  page, never on `/`, and React strips the warning from production builds. It
+  was the only console output across both roles. The fix is a one-line key
+  change, but that sits outside the UI-redesign scope, so it is left for a
+  separate task.
+- The stacked hero sparkline is still stretched about 1.5× (UI-06/UI-07 note).
+  Kept deliberately.
+- The Google Fonts request is the only third-party dependency on the page and
+  could shift text on a slow first load (UI-07 note).
+- The UI-07 and UI-08 changes are uncommitted. The plan asks for a commit per
+  phase, and that was not done here because nobody asked for one.
 
 ---
 
 ## UI REDESIGN COMPLETION
 
-Status: [ ]
+Status: [x]
 
-Completion date:
+Completion date: 2026-09-22
 
 Final validation:
 
-- Tests:
-- Typecheck:
-- Build:
-- Responsive:
-- Accessibility:
-- Performance:
-- Git diff audit:
+- Tests: `npm test`: 20 files, 60 passed. Backend `pytest -q`: 189 passed. `ruff check .`: clean.
+- Typecheck: `npm run typecheck` passed.
+- Build: `npm run build` passed.
+- Responsive: 320 / 375 / 768 / 1024 / 1440 px measured in UI-06. No overflow, and every target is at least 44 px. Re-checked at the tab's natural width in UI-08.
+- Accessibility: UI-07 audit (tab order, focus ring, skip link, contrast with 0 failures, semantics, reduced motion). The mobile menu was re-checked live in UI-08.
+- Performance: CLS 0 (0.0001 over a full scroll), 0 long tasks, 0 API requests from `/`, and no new runtime dependency.
+- Git diff audit: since `bba285f`, nothing changed in `backend/`, `openapi.json`, `frontend/src/api`, `auth`, `types`, `pages/student`, `pages/teacher` or any shared component. Routes, styles and tokens changed additively only.
 
 Known remaining issues:
 
--
--
--
+- `TrendLineChart` duplicate-key React dev warning (pre-existing, Phase 17, outside redesign scope).
+- The stacked hero sparkline is stretched about 1.5× by `preserveAspectRatio="none"`.
+- Google Fonts loads from the network, so text could shift on a slow uncached load.

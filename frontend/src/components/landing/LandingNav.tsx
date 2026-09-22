@@ -57,7 +57,10 @@ export function LandingNav() {
     >
       <div
         className={cx(
-          "mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 transition-all duration-landing ease-landing",
+          // Padding is the only property that changes here, and it is a layout
+          // property, so it is named rather than left to `all` and it snaps
+          // under prefers-reduced-motion instead of easing for 420ms.
+          "mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 transition-[padding] duration-landing ease-landing motion-reduce:transition-none",
           condensed ? "py-2.5" : "py-4",
         )}
       >

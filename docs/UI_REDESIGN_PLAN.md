@@ -917,6 +917,129 @@ with the final completion record.
 
 ---
 
+# FINAL APPROVED DESIGN (recorded in UI-08, 2026-09-22)
+
+This is the design as shipped at the end of UI-07 and verified in UI-08. Where it
+differs from the phase instructions above, this section and the phase records in
+`.cursor/indexes/PHASE_TRACK.md` are authoritative.
+
+## Visual identity
+
+**Academic Instrument.** Warm archival paper, ink-blue as the only brand hue,
+measurement as the visual language (hairline rules, mono tick labels, an engraved
+grid), typography-led hierarchy and restrained depth. No gradients as decoration,
+no glassmorphism beyond the condensed header's `blur(4px)`, no illustrations.
+
+## Design tokens
+
+A second, additive layer (D39). Values are `--landing-*` custom properties on
+`:root` in `frontend/src/index.css`, colours as rgb triples so Tailwind alpha
+modifiers work, exposed as the `landing-*` Tailwind namespace. No Phase 17 token
+was redefined, so the dashboards did not move.
+
+| Group | Tokens |
+|---|---|
+| Surfaces | `paper` #F4F0E6 · `canvas` #FAF6EC · `surface` #FFFCF7 · `raised` #FFFFFF |
+| Rules | `rule-faint` #E6DFCF · `rule` #D7D0C3 · `rule-strong` #BDB3A0 |
+| Ink | `ink` #122033 · `ink-body` #2A3A4D · `ink-muted` #5C6B7A |
+| Accent | `accent` #1F4E79 · `accent-hover` #163A5A · `accent-soft` #E8F0F7 · `accent-ink` #FFFCF7 |
+| Radii | `sm` .375rem · `md` .625rem · `lg` .875rem · `xl` 1.25rem |
+| Shadows | `landing-card`, `landing-panel`, `landing-nav` (two-layer, ink-tinted) |
+| Motion | `ease-landing` cubic-bezier(0.22, 0.61, 0.36, 1) · `fast` 180 ms · `base` 420 ms · `slow` 720 ms |
+
+## Typography
+
+Source Serif 4 600/700 for headings and Source Sans 3 400/500/600 for copy, from
+one Google Fonts request with `display=swap`; system monospace for metrics,
+labels, dates and eyebrows. Landing heading weights (serif 700) are scoped under
+`.saa-landing`. Type scale: `.saa-display`, `.saa-headline`, `.saa-subhead`,
+`.saa-lede`, `.saa-eyebrow`, `.saa-label`, `.saa-metric`. The h1 is 40 px at
+375 px and 64 px at 1440 px.
+
+## Motion system
+
+"The data breathes, nothing bounces." CSS only, no animation library.
+
+- **Entrance** (`.saa-landing-enter`, load-driven): hero eyebrow, headline, copy,
+  CTAs and panel at 0 / 80 / 160 / 240 / 320 ms, 420 ms each (panel 560 ms).
+- **Hero data**: gauge sweep 480 ms (`.saa-hero-panel .saa-gauge-fill`),
+  attendance draw 600 ms over 720 ms (`.saa-landing-draw`), factor bars
+  720 / 770 / 820 ms (`.saa-landing-sweep`, `scaleX` so nothing reflows), AI
+  explanation 940 ms (`.saa-landing-fade`), end-point dot 1200 ms.
+- **Scroll** (`.saa-reveal` via `Reveal` + `useInView`): each section below the
+  hero fades up once.
+- **Ambient** (backdrop only, `aria-hidden`): grid drifts one 32 px cell over
+  60 s linear; light pool breathes over 52 s. Compositor-only.
+- **Hover**: colour change plus a 1 px lift gated on `motion-safe`, with named
+  transition properties (never `all`).
+- **Reduced motion**: every class above resolves to its final state, the ambient
+  loops never start, reveals are visible immediately and the nav condense snaps.
+  `getAnimations()` reports 0 running animations.
+
+## Landing sections
+
+In order: `LandingNav` (fixed, condenses past 8 px) → `HeroSection` →
+`TrustStrip` (four measured product facts) → `ProductPreview` (#product, static
+dashboard reconstruction with three numbered callouts) → `FeatureGrid`
+(#features, six capability areas) → `HowItWorks` (#how-it-works, three stages) →
+`ExplainabilitySection` (#explainability, real weights and four honesty claims)
+→ `CtaBand` → `LandingFooter` (product anchors, account links, synthetic-data and
+risk disclaimers).
+
+## Hero specification
+
+Asymmetric 7/5 grid from `lg`, stacked below with the panel capped at `max-w-md`
+and centred. Eyebrow "Python computes. AI explains.", two-tone h1 "Know what's
+slipping, and what to do about it.", supporting paragraph, CTAs, then the shared
+`RISK_DISCLAIMER`. The advisor panel is a `<figure>` captioned "Example data · not
+a real student" and renders the risk engine's worked R3 case
+(`RISK_ENGINE_SPEC.md` 6.8): score 67.1 HIGH, completeness 1.00, attendance
+64.0% declining at −4.4 pts/week, contributions 18.8 / 16.3 / 13.1, with the
+engine's own note templates. It reuses `RiskGauge`/`RiskBadge` unchanged.
+
+CTAs come from `useLandingCta` (reads `useAuth()` only): signed out shows "Get
+started" → `/register` and "Log in" → `/login`; signed in shows one "Go to your
+dashboard" → `/student` or `/teacher` by role (D40).
+
+## Component architecture
+
+- Page: `frontend/src/pages/LandingPage.tsx` (skip link, nav, `main`, footer; no
+  API call, no auth requirement). Route `/`; `HomeRedirect` moved to `/home` (D38).
+- Sections and primitives: `frontend/src/components/landing/` — `Section`
+  (band, heading ids, optional `backdrop`, `scroll-mt-24`), `Reveal`,
+  `HeroBackdrop`, `HeroAdvisorPanel`, the section components above.
+- Shared helpers: `actionStyles.ts` (one definition of primary/outline/text
+  actions), `motion.ts` (`enterDelay`), `useLandingCta.ts`.
+- Static data: `heroDemoData.ts`, `productPreviewData.ts` (reuses the hero case
+  so both figures describe one example student).
+- Hooks: `frontend/src/lib/useInView.ts`, `frontend/src/lib/usePrefersReducedMotion.ts`.
+
+## Responsive strategy
+
+Verified at 375, 768, 1024 and 1440 px (and 320 px). The hero recomposes rather
+than shrinking; trust strip 1 → 2 → 4 columns; features 1 → 2 → 3; stages switch
+from a vertical timeline (rule on the left) to a horizontal progression at `md`;
+the preview's navigation rail appears from `lg`; the header collapses to an
+always-mounted, `hidden`-toggled menu below `md`. No horizontal overflow at any
+width.
+
+## Accessibility requirements
+
+One h1; every section `aria-labelledby` its own heading; both figures have their
+own `figcaption`; the sparkline is `role="img"` with an `aria-label`; decorative
+layers are `aria-hidden` with the same figures available as text. Skip link to
+`#landing-main`. Every interactive target is at least 44 px. Mobile menu closes
+on Escape and returns focus to the toggle. Global `:focus-visible` ring. All
+landing text meets WCAG AA (lowest measured 4.75:1). Nothing is revealed on hover.
+
+## Performance requirements
+
+Zero API requests from `/` (signed out or signed in). No runtime dependency added.
+CLS 0 on load; zero long tasks; only transform/opacity animate after load. The
+only third-party request is the Google Fonts stylesheet and its font files.
+
+---
+
 # PHASE EXECUTION PROTOCOL
 
 Each phase MUST be executed in a separate Cursor Agent chat whenever practical.

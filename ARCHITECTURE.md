@@ -78,9 +78,11 @@ student-academic-advisor/
         │                RiskGauge FallbackBanner charts/TrendLineChart
         │                ui/{Button,Card,Badge,Field,Input,Select,Textarea,Alert,
         │                    Skeleton,Tabs,Modal,PageHeader}
-        │                landing/ Section Reveal LandingNav HeroSection TrustStrip
-        │                         ProductPreview FeatureGrid HowItWorks
-        │                         ExplainabilitySection CtaBand LandingFooter
+        │                landing/ Section Reveal LandingNav HeroSection HeroBackdrop
+        │                         HeroAdvisorPanel TrustStrip ProductPreview FeatureGrid
+        │                         HowItWorks ExplainabilitySection CtaBand LandingFooter
+        │                         useLandingCta actionStyles motion
+        │                         heroDemoData productPreviewData (static example data)
         ├── pages/       LandingPage LoginPage RegisterPage ForbiddenPage PlaceholderPage
         │                student/ Home Risk Performance Subjects WhatIf Advisor
         │                Planner Interventions Profile

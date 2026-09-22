@@ -269,6 +269,16 @@ describe("LandingPage motion", () => {
     expect(panel?.querySelectorAll(".saa-landing-fade")).toHaveLength(2);
   });
 
+  it("names the property the navigation condense transitions, and drops it under reduced motion", () => {
+    const { container } = renderApp(<LandingPage />);
+
+    const bar = container.querySelector("header > div");
+    expect(bar).not.toBeNull();
+    expect(bar?.className).toContain("transition-[padding]");
+    expect(bar?.className).toContain("motion-reduce:transition-none");
+    expect(bar?.className).not.toContain("transition-all");
+  });
+
   it("runs the ambient loops on the decorative hero backdrop only", () => {
     const { container } = renderApp(<LandingPage />);
 

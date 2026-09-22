@@ -86,9 +86,17 @@ the tokens above, so changing it cannot move the dashboards.
   `.saa-label`, `.saa-metric`. The last three use system monospace.
 - Landing heading weights (serif 700) are scoped under `.saa-landing` on the landing root.
   Do not apply that class outside the landing page.
-- Motion: `.saa-landing-enter` on load (stagger with `--saa-enter-delay`), `.saa-reveal` on
-  scroll, `.saa-landing-draw` for SVG paths. All three resolve instantly under
-  `prefers-reduced-motion: reduce`.
+- Motion: `.saa-landing-enter` on load (stagger with `--saa-enter-delay`, set through
+  `enterDelay()` in `components/landing/motion.ts`), `.saa-reveal` on scroll,
+  `.saa-landing-draw` for SVG paths, `.saa-landing-sweep` for proportional bars
+  (`scaleX`, never width), `.saa-landing-fade` for text that follows its figures, and
+  `.saa-ambient-grid` / `.saa-ambient-glow` for the two slow loops on the decorative hero
+  backdrop only. All resolve to their final state under `prefers-reduced-motion: reduce`,
+  and the ambient loops never start.
+- Actions: use `primaryAction`, `outlineAction` and `textLink` from
+  `components/landing/actionStyles.ts`. Hover is colour plus a 1 px `motion-safe` lift;
+  transitions name their properties, never `all`. Targets are at least 44 px (`min-h-11`).
+- Landing figures are static example data, labelled as such, and the page makes no API call.
 
 **Spacing:** 8 px grid (`2`, `4`, `6`, `8`). Page max width `7xl`. Card padding `p-5`.
 
