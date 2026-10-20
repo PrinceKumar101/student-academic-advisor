@@ -1,3 +1,4 @@
+
 from functools import lru_cache
 from pathlib import Path
 
@@ -19,8 +20,16 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me"
     jwt_expire_minutes: int = 60
     cors_origins: str = "http://localhost:5173"
+
+    # OpenAI settings (retained for compatibility)
     openai_api_key: str = ""
     openai_model: str = ""
+
+    # Gemini settings
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.5-flash"
+
+    # AI timeouts and usage limits
     ai_timeout_seconds: int = 20
     ai_plan_timeout_seconds: int = 40
     ai_daily_analysis_limit: int = 10
@@ -35,6 +44,10 @@ class Settings(BaseSettings):
     @property
     def openai_configured(self) -> bool:
         return bool(self.openai_api_key.strip())
+
+    @property
+    def gemini_configured(self) -> bool:
+        return bool(self.gemini_api_key.strip())
 
     @property
     def cors_origin_list(self) -> list[str]:

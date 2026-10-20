@@ -1,5 +1,6 @@
 from __future__ import annotations
-
+import logging
+logger = logging.getLogger("app.ai.validators")
 import json
 import re
 from dataclasses import dataclass
@@ -47,11 +48,19 @@ def extract_grounded_claims(text: str) -> list[float]:
     return values
 
 
+
 def is_grounded(text: str, context: StudentAcademicContext) -> bool:
     allowed = context.grounding_numbers()
+
     for claim in extract_grounded_claims(text):
         if not any(abs(claim - value) <= 0.5 for value in allowed):
+            logger.warning(
+                "Ungrounded AI claim rejected: claim=%s, allowed_values=%s",
+                claim,
+                allowed,
+            )
             return False
+
     return True
 
 

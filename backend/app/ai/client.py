@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import logging
@@ -14,6 +15,10 @@ logger = logging.getLogger("app.ai")
 REASON_NOT_CONFIGURED = "NOT_CONFIGURED"
 REASON_TIMEOUT = "TIMEOUT"
 REASON_PROVIDER_ERROR = "PROVIDER_ERROR"
+
+GEMINI_BASE_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/openai/"
+)
 
 
 @dataclass(frozen=True)
@@ -51,6 +56,8 @@ class AIClient(Protocol):
 
 
 class OpenAIClient:
+    """Gemini client using Google's OpenAI-compatible API endpoint."""
+
     def __init__(
         self,
         settings: Settings | None = None,
@@ -71,13 +78,16 @@ class OpenAIClient:
         max_tokens: int,
         user_id: int | None = None,
     ) -> CompletionResult:
-        if not self._settings.openai_configured:
+        if not self._settings.gemini_configured:
             raise AIClientError(
                 REASON_NOT_CONFIGURED,
-                "OpenAI API key is not configured",
+                "Gemini API key is not configured",
                 retryable=False,
             )
+
         started = time.perf_counter()
+        model = self._settings.gemini_model.strip()
+
         try:
             result = self._call(
                 messages,
@@ -91,10 +101,12 @@ class OpenAIClient:
                     user_id,
                     started,
                     outcome=exc.reason,
-                    model=self._settings.openai_model or None,
+                    model=model or None,
                 )
                 raise
+
             self._sleep(self._settings.ai_retry_backoff_seconds)
+
             try:
                 result = self._call(
                     messages,
@@ -107,9 +119,10 @@ class OpenAIClient:
                     user_id,
                     started,
                     outcome=retry_exc.reason,
-                    model=self._settings.openai_model or None,
+                    model=model or None,
                 )
                 raise
+
         self._log(
             feature,
             user_id,
@@ -134,13 +147,14 @@ class OpenAIClient:
                 timeout_seconds=timeout_seconds,
                 max_tokens=max_tokens,
             )
-        return self._send_openai(
+
+        return self._send_gemini(
             messages,
             timeout_seconds=timeout_seconds,
             max_tokens=max_tokens,
         )
 
-    def _send_openai(
+    def _send_gemini(
         self,
         messages: list[dict[str, str]],
         *,
@@ -155,11 +169,17 @@ class OpenAIClient:
             RateLimitError,
         )
 
-        model = self._settings.openai_model.strip() or "gpt-4o-mini"
+        model = (
+            self._settings.gemini_model.strip()
+            or "gemini-2.5-flash"
+        )
+
         client = OpenAI(
-            api_key=self._settings.openai_api_key,
+            api_key=self._settings.gemini_api_key,
+            base_url=GEMINI_BASE_URL,
             timeout=timeout_seconds,
         )
+
         try:
             response = client.chat.completions.create(
                 model=model,
@@ -170,42 +190,63 @@ class OpenAIClient:
             )
         except APITimeoutError as exc:
             raise AIClientError(
-                REASON_TIMEOUT, "AI provider timed out", retryable=True
+                REASON_TIMEOUT,
+                "Gemini API request timed out",
+                retryable=True,
             ) from exc
         except RateLimitError as exc:
             raise AIClientError(
                 REASON_PROVIDER_ERROR,
-                "AI provider rate-limited the request",
+                "Gemini API rate-limited the request",
                 retryable=True,
             ) from exc
         except APIConnectionError as exc:
             raise AIClientError(
                 REASON_PROVIDER_ERROR,
-                "AI provider connection failed",
+                "Could not connect to the Gemini API",
                 retryable=True,
             ) from exc
         except APIStatusError as exc:
-            retryable = exc.status_code >= 500 or exc.status_code == 429
-            reason = REASON_TIMEOUT if exc.status_code == 408 else REASON_PROVIDER_ERROR
+            retryable = (
+                exc.status_code >= 500
+                or exc.status_code in (408, 429)
+            )
+            reason = (
+                REASON_TIMEOUT
+                if exc.status_code == 408
+                else REASON_PROVIDER_ERROR
+            )
+
             raise AIClientError(
                 reason,
-                f"AI provider returned HTTP {exc.status_code}",
+                f"Gemini API returned HTTP {exc.status_code}",
                 retryable=retryable,
             ) from exc
 
-        choice = response.choices[0].message.content if response.choices else None
+        choice = (
+            response.choices[0].message.content
+            if response.choices
+            else None
+        )
+
         if not choice:
             raise AIClientError(
                 REASON_PROVIDER_ERROR,
-                "AI provider returned an empty completion",
+                "Gemini API returned an empty completion",
                 retryable=False,
             )
+
         usage = response.usage
+
         return CompletionResult(
             text=choice,
             model=response.model or model,
-            prompt_tokens=usage.prompt_tokens if usage else None,
-            completion_tokens=usage.completion_tokens if usage else None,
+            prompt_tokens=(
+                usage.prompt_tokens if usage else None
+            ),
+            completion_tokens=(
+                usage.completion_tokens if usage else None
+            ),
         )
 
     def _log(
@@ -226,7 +267,10 @@ class OpenAIClient:
                 "user_id": user_id,
                 "feature": feature,
                 "model": model,
-                "latency_ms": round((time.perf_counter() - started) * 1000, 1),
+                "latency_ms": round(
+                    (time.perf_counter() - started) * 1000,
+                    1,
+                ),
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
                 "outcome": outcome,
@@ -262,13 +306,20 @@ class FakeAIClient:
         user_id: int | None = None,
     ) -> CompletionResult:
         del feature, timeout_seconds, max_tokens, user_id
+
         self.calls += 1
         self.last_messages = messages
+
         if self.errors:
             raise self.errors.pop(0)
+
         if self.error is not None:
             raise self.error
-        return CompletionResult(text=self.text, model=self.model)
+
+        return CompletionResult(
+            text=self.text,
+            model=self.model,
+        )
 
 
 def get_ai_client() -> AIClient:
